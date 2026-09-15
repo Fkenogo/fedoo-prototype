@@ -1,18 +1,23 @@
-import { ServiceSignal, FeedbackSession, Measure } from '../types';
+import { ServiceSignal, Measure } from '../types';
 
 /**
- * Calculates updated signal metrics when a new session is recorded.
+ * [PROTOTYPE ASSUMPTION ANNOTATION]:
+ * This client helper simulates how a newly recorded customer feedback session
+ * increments counts and recalculates sample distribution in the prototype.
+ * In production Fedoo, signal aggregation, bayesian smoothing, and confidence
+ * thresholds are computed authoritatively by the Fedoo backend engine.
  */
 export function recalculateSignalWithSession(
   currentSignal: ServiceSignal,
-  measure: Measure,
+  _measure: Measure,
   scoreIndex: number, // 1 to 5
   scaleValue: string
 ): ServiceSignal {
   const newResponseCount = currentSignal.responseCount + 1;
   const isFavourable = scoreIndex >= 4;
 
-  const currentFavourableCount = Math.round((currentSignal.favourablePercentage / 100) * currentSignal.responseCount);
+  const currentFavourablePercentage = currentSignal.favourablePercentage ?? 0;
+  const currentFavourableCount = Math.round((currentFavourablePercentage / 100) * currentSignal.responseCount);
   const newFavourableCount = currentFavourableCount + (isFavourable ? 1 : 0);
   const newFavourablePercentage = Math.round((newFavourableCount / newResponseCount) * 100);
 
@@ -34,12 +39,13 @@ export function recalculateSignalWithSession(
     favourablePercentage: newFavourablePercentage,
     scoreLabel: `${newFavourablePercentage}% Favourable`,
     distribution: updatedDistribution,
-    sufficiencyState: newResponseCount >= 50 ? 'healthy' : 'early_signal',
+    // Simulated prototype analytical state:
+    evidenceLevel: newResponseCount >= 40 ? 'sufficient' : 'limited',
   };
 }
 
 /**
- * Format relative timestamps
+ * Format relative timestamps or dates
  */
 export function formatTimeAgo(timestamp: string): string {
   return timestamp;

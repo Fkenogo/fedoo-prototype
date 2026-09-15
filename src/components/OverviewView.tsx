@@ -1,241 +1,248 @@
 import React from 'react';
 import { 
+  CheckCircle2, 
+  AlertTriangle, 
   TrendingUp, 
   TrendingDown, 
   Minus, 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock, 
   ArrowRight, 
   QrCode, 
-  Sparkles, 
-  Sliders, 
-  Building2,
-  Info,
+  MessageSquare, 
+  Sparkles,
+  MapPin,
+  HelpCircle,
+  Clock,
+  ShieldCheck,
   ChevronRight,
-  ShieldAlert
+  Info
 } from 'lucide-react';
-import { Measure, Location, Endpoint, ServiceSignal, FeedbackSession } from '../types';
+import { 
+  Measure, 
+  ServiceSignal, 
+  Location, 
+  Endpoint, 
+  FeedbackSession, 
+  NeedsReviewItem,
+  AppTab
+} from '../types';
 
 interface OverviewViewProps {
   currentScope: string;
+  scopeLocationName: string;
   locations: Location[];
   measures: Measure[];
-  endpoints: Endpoint[];
   signals: Record<string, ServiceSignal>;
+  endpoints: Endpoint[];
   recentSessions: FeedbackSession[];
+  needsReviewItems: NeedsReviewItem[];
   onSelectMeasure: (measureId: string) => void;
-  onNavigateTab: (tab: 'measures' | 'endpoints' | 'locations' | 'activity') => void;
-  onOpenParticipantSimulator: (endpointId?: string) => void;
+  onNavigateTab: (tab: AppTab) => void;
+  onSelectEndpoint: (endpointId: string) => void;
+  onStartSetup: () => void;
 }
 
 export const OverviewView: React.FC<OverviewViewProps> = ({
   currentScope,
+  scopeLocationName,
   locations,
   measures,
-  endpoints,
   signals,
+  endpoints,
   recentSessions,
+  needsReviewItems,
   onSelectMeasure,
   onNavigateTab,
-  onOpenParticipantSimulator,
+  onSelectEndpoint,
+  onStartSetup,
 }) => {
-  const isAllLocations = currentScope === 'all';
-  const activeLocation = locations.find((l) => l.id === currentScope);
+  // Filter endpoints and sessions to the current scope
+  const filteredEndpoints = currentScope === 'all' 
+    ? endpoints 
+    : endpoints.filter((e) => e.locationId === currentScope);
 
-  // Filter endpoints for current scope
-  const scopedEndpoints = isAllLocations
-    ? endpoints
-    : endpoints.filter((ep) => ep.locationId === currentScope);
+  const filteredSessions = currentScope === 'all'
+    ? recentSessions
+    : recentSessions.filter((s) => s.locationId === currentScope);
 
-  const activeEndpointsCount = scopedEndpoints.filter((ep) => ep.status === 'active').length;
-  const totalResponsesInScope = isAllLocations
-    ? locations.reduce((acc, l) => acc + l.totalResponses, 0)
-    : activeLocation?.totalResponses || 0;
+  const filteredNeedsReview = currentScope === 'all'
+    ? needsReviewItems
+    : needsReviewItems.filter((item) => item.locationId === currentScope);
 
-  // Find active measures tracked in this scope
+  const totalResponses = filteredEndpoints.reduce((sum, ep) => sum + ep.totalResponses, 0);
+  const activeEndpointsCount = filteredEndpoints.filter((e) => e.status === 'active').length;
+
+  // Active measures tracked in this scope
   const activeMeasureIds = Array.from(
-    new Set(scopedEndpoints.flatMap((ep) => ep.activeMeasureIds))
+    new Set(filteredEndpoints.flatMap((e) => e.activeMeasureIds))
   );
-
   const activeMeasures = measures.filter((m) => activeMeasureIds.includes(m.id));
 
-  // Collect any attention flags across this scope
-  const attentionItems: { measure: Measure; signal: ServiceSignal; locationName: string }[] = [];
-
-  activeMeasures.forEach((m) => {
-    const key = `${m.id}_${currentScope}`;
-    const signal = signals[key] || signals[`${m.id}_all`];
-    if (signal?.attentionFlag) {
-      attentionItems.push({
-        measure: m,
-        signal,
-        locationName: isAllLocations ? 'Organisation-wide' : activeLocation?.name || 'This Location',
-      });
-    }
-  });
-
-  return (
-    <div className="space-y-8 pb-12">
-      {/* Scope Framing Hero */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-600" />
-              Continuous Service Visibility
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              {isAllLocations ? 'How customers experience Bubbles Café right now' : `Customer experience at ${activeLocation?.name}`}
-            </h1>
-            <p className="text-slate-600 text-sm mt-1 max-w-3xl leading-relaxed">
-              Fedoo continuously collects short, structured feedback across persistent doorways. 
-              Review the independent health of each service dimension below.
-            </p>
+  // EMPTY STATE: If no feedback points or responses exist
+  if (endpoints.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-6">
+            <QrCode className="w-8 h-8" />
           </div>
-
-          <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">
+            Start Hearing from Your Customers
+          </h2>
+          <p className="text-slate-600 max-w-md mx-auto text-sm leading-relaxed mb-8">
+            You don't have any feedback points set up yet. Create your first feedback point to generate a QR code and start collecting customer feedback.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={() => onOpenParticipantSimulator(scopedEndpoints[0]?.id)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95"
+              onClick={() => onNavigateTab('feedback-points')}
+              className="w-full sm:w-auto px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-sm shadow-sm transition-colors flex items-center justify-center gap-2"
             >
-              <QrCode className="w-4 h-4 text-emerald-400" />
-              <span>Submit Test Feedback</span>
+              <QrCode className="w-4 h-4" />
+              <span>Create First Feedback Point</span>
             </button>
             <button
-              onClick={() => onNavigateTab('endpoints')}
-              className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl text-xs font-medium border border-slate-200 transition-colors"
+              onClick={onStartSetup}
+              className="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
             >
-              <span>Manage Doorways</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Run Guided Setup</span>
             </button>
-          </div>
-        </div>
-
-        {/* Operational Collection Health Strip */}
-        <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-            <div className="text-slate-500 font-medium">Feedback Doorways</div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5 flex items-baseline gap-1.5">
-              <span>{activeEndpointsCount}</span>
-              <span className="text-[11px] font-normal text-emerald-600">Active</span>
-            </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              {scopedEndpoints.filter((e) => e.status === 'paused').length > 0 
-                ? `${scopedEndpoints.filter((e) => e.status === 'paused').length} paused` 
-                : 'All collection points online'}
-            </div>
-          </div>
-
-          <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-            <div className="text-slate-500 font-medium">Accumulated Evidence</div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">
-              {totalResponsesInScope} <span className="text-xs font-normal text-slate-500">responses</span>
-            </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Last response 14 mins ago
-            </div>
-          </div>
-
-          <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-            <div className="text-slate-500 font-medium">Tracked Dimensions</div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">
-              {activeMeasures.length} <span className="text-xs font-normal text-slate-500">governed</span>
-            </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              Quick burden (~30s participant)
-            </div>
-          </div>
-
-          <div className="bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-            <div className="text-slate-500 font-medium">Evidence Sufficiency</div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
-              {totalResponsesInScope >= 50 ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span className="text-sm font-semibold text-emerald-700">Healthy sample</span>
-                </>
-              ) : (
-                <>
-                  <Clock className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-semibold text-amber-700">Early signal</span>
-                </>
-              )}
-            </div>
-            <div className="text-[11px] text-slate-500 mt-1">
-              {totalResponsesInScope >= 50 ? 'Sufficient for reliable trend' : 'Early volume accumulating'}
-            </div>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Attention Required Panel (Evidence-Based, NOT generic advice) */}
-      {attentionItems.length > 0 && (
-        <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
-              <AlertCircle className="w-5 h-5" />
+  return (
+    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* 1. CURRENT SERVICE PICTURE: Headline Banner */}
+      <section aria-labelledby="service-picture-heading" className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                Service Picture • {scopeLocationName}
+              </span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-amber-950">
-                  Evidence Deserving Management Review ({attentionItems.length})
-                </h3>
-                <span className="text-[11px] font-medium text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-200">
-                  Evidence-based trigger
-                </span>
+
+            <h1 id="service-picture-heading" className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              {totalResponses === 0 ? (
+                'Waiting for your first responses'
+              ) : filteredNeedsReview.length > 0 ? (
+                'Service is generally positive, with 1 area to review'
+              ) : (
+                'Service is running smoothly across all tracked areas'
+              )}
+            </h1>
+
+            <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
+              {totalResponses === 0 ? (
+                'Your feedback points are active. Place table stands or share your direct link to start collecting ratings.'
+              ) : (
+                `Based on ${totalResponses} recent customer responses across ${activeEndpointsCount} active feedback points.`
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 bg-slate-50 border border-slate-200/80 p-4 rounded-2xl shrink-0">
+            <div>
+              <div className="text-2xl font-black text-slate-900 leading-none">
+                {totalResponses}
               </div>
-              <p className="text-xs text-amber-900/80 mt-1">
-                Fedoo surfaces meaningful shifts in customer evidence without generating subjective opinions.
-              </p>
-
-              <div className="mt-3 space-y-2">
-                {attentionItems.map(({ measure, signal, locationName }) => (
-                  <div
-                    key={measure.id}
-                    onClick={() => onSelectMeasure(measure.id)}
-                    className="cursor-pointer bg-white/90 hover:bg-white rounded-xl p-3.5 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-xs text-slate-900">{measure.name}</span>
-                        <span className="text-[11px] text-slate-500">• {locationName}</span>
-                        <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded">
-                          {signal.scoreLabel}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                        {signal.attentionFlag?.explanation}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 flex items-center gap-1">
-                        Inspect evidence
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-[11px] text-slate-500 font-medium mt-1">
+                Total Responses
+              </div>
+            </div>
+            <div className="w-px h-8 bg-slate-200" />
+            <div>
+              <div className="text-2xl font-black text-emerald-700 leading-none">
+                {activeEndpointsCount}
+              </div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1">
+                Active Points
               </div>
             </div>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Primary Service Signals Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
+      {/* 2. NEEDS REVIEW: Actionable Items for Management */}
+      <section aria-labelledby="review-section-heading" className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 id="review-section-heading" className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <AlertTriangle className={`w-4 h-4 ${filteredNeedsReview.length > 0 ? 'text-amber-500' : 'text-slate-400'}`} />
+            <span>Needs Review</span>
+            {filteredNeedsReview.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900">
+                {filteredNeedsReview.length}
+              </span>
+            )}
+          </h2>
+        </div>
+
+        {filteredNeedsReview.length > 0 ? (
+          <div className="space-y-3">
+            {filteredNeedsReview.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => onSelectMeasure(item.measureId)}
+                className="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-5 hover:bg-amber-50 hover:border-amber-300 transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-200/80 text-amber-950">
+                      {item.measureName}
+                    </span>
+                    <span className="text-xs text-amber-900 font-semibold flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {item.locationName}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                    {item.headline}
+                  </h3>
+                  <p className="text-xs text-slate-700 max-w-3xl leading-relaxed">
+                    {item.explanation}
+                  </p>
+                  <div className="text-[11px] text-amber-900/80 font-medium">
+                    {item.evidenceNote}
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-amber-900 group-hover:text-amber-950">
+                  <span>View Breakdown</span>
+                  <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-3.5 text-slate-600">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold text-slate-900">All clear. </span>
+              No service bottlenecks or negative patterns detected in customer feedback for this scope.
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* 3. WHAT WE TRACK: Individual Measure Cards */}
+      <section aria-labelledby="measures-heading" className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Current Service Signals</h2>
-            <p className="text-xs text-slate-500">
-              Select any measure to inspect its historical evolution, distribution, and location breakdown.
+            <h2 id="measures-heading" className="text-base font-bold text-slate-900">
+              What We're Tracking
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Individual service aspects measured across customer feedback points
             </p>
           </div>
           <button
-            onClick={() => onNavigateTab('measures')}
-            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
+            onClick={() => onNavigateTab('what-we-track')}
+            className="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1"
           >
-            <span>Browse Measure Library</span>
+            <span>Manage Measures</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -243,208 +250,189 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {activeMeasures.map((measure) => {
             const signalKey = `${measure.id}_${currentScope}`;
-            const signal = signals[signalKey] || signals[`${measure.id}_all`];
-            const change = signal?.periodChange;
+            const fallbackKey = `${measure.id}_all`;
+            const signal = signals[signalKey] || signals[fallbackKey];
+
+            const favourable = signal?.favourablePercentage;
+            const evidence = signal?.evidenceLevel || 'none';
+            const movement = signal?.movement;
 
             return (
               <div
                 key={measure.id}
                 onClick={() => onSelectMeasure(measure.id)}
-                className="group bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col justify-between"
+                className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-emerald-600/60 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                        {measure.category}
-                      </span>
-                      <h3 className="font-bold text-slate-900 text-base group-hover:text-emerald-800 transition-colors">
-                        {measure.name}
-                      </h3>
-                    </div>
-
-                    {/* Sufficiency Badge */}
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                        signal?.sufficiencyState === 'healthy'
-                          ? 'bg-slate-100 text-slate-700 border-slate-200'
-                          : 'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}
-                    >
-                      {signal?.sufficiencyState === 'healthy' ? 'Healthy volume' : 'Early signal'}
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      {measure.category}
+                    </span>
+                    {/* Evidence Level Badge */}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      evidence === 'sufficient'
+                        ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                        : evidence === 'limited'
+                        ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {evidence === 'sufficient'
+                        ? 'Reliable picture'
+                        : evidence === 'limited'
+                        ? 'Early feedback'
+                        : 'No responses yet'}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                  <h3 className="font-bold text-slate-900 text-base group-hover:text-emerald-800 transition-colors">
+                    {measure.name}
+                  </h3>
+
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
                     {measure.shortDescription}
                   </p>
+                </div>
 
-                  {/* Headline Metric */}
-                  <div className="mt-5 flex items-baseline justify-between">
+                <div className="pt-5 mt-4 border-t border-slate-100">
+                  <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-2xl font-extrabold tracking-tight text-slate-900">
-                        {signal?.favourablePercentage}%
-                        <span className="text-xs font-normal text-slate-500 ml-1.5">favourable</span>
+                      <div className="text-2xl font-black text-slate-900 tracking-tight">
+                        {favourable !== null && favourable !== undefined ? (
+                          `${favourable}%`
+                        ) : (
+                          <span className="text-slate-400 text-lg font-bold">—</span>
+                        )}
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Based on <strong className="font-semibold text-slate-700">{signal?.responseCount}</strong> customer responses
+                      <div className="text-[11px] text-slate-500 font-medium">
+                        Favourable ratings ({signal?.responseCount || 0} responses)
                       </div>
                     </div>
 
-                    {/* Period movement */}
-                    {change && (
-                      <div
-                        className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${
-                          change.direction === 'up'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : change.direction === 'down'
-                            ? 'bg-rose-50 text-rose-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {change.direction === 'up' && <TrendingUp className="w-3.5 h-3.5" />}
-                        {change.direction === 'down' && <TrendingDown className="w-3.5 h-3.5" />}
-                        {change.direction === 'steady' && <Minus className="w-3.5 h-3.5" />}
+                    {/* Movement Indicator */}
+                    {movement && movement.direction !== 'unavailable' && (
+                      <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg ${
+                        movement.direction === 'improving'
+                          ? 'bg-emerald-50 text-emerald-800'
+                          : movement.direction === 'declining'
+                          ? 'bg-rose-50 text-rose-800'
+                          : 'bg-slate-50 text-slate-600'
+                      }`}>
+                        {movement.direction === 'improving' && <TrendingUp className="w-3.5 h-3.5" />}
+                        {movement.direction === 'declining' && <TrendingDown className="w-3.5 h-3.5" />}
+                        {movement.direction === 'steady' && <Minus className="w-3.5 h-3.5" />}
                         <span>
-                          {change.deltaPoints > 0 ? `+${change.deltaPoints}` : change.deltaPoints} pts
+                          {movement.deltaPoints !== undefined && movement.deltaPoints > 0 ? `+${movement.deltaPoints}` : movement.deltaPoints}
+                          {movement.deltaPoints !== undefined ? '%' : ''}
                         </span>
                       </div>
                     )}
                   </div>
-
-                  {/* Response distribution preview bar */}
-                  {signal?.distribution && (
-                    <div className="mt-4 pt-3 border-t border-slate-100">
-                      <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-                        <span>Distribution (5-point scale)</span>
-                        <span>{signal.distribution[0]?.percentage}% top rating</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex">
-                        {signal.distribution.map((dist, idx) => {
-                          // Green to slate to rose color scale
-                          const colors = [
-                            'bg-emerald-600',
-                            'bg-emerald-400',
-                            'bg-slate-300',
-                            'bg-amber-400',
-                            'bg-rose-500',
-                          ];
-                          return (
-                            <div
-                              key={dist.label}
-                              style={{ width: `${dist.percentage}%` }}
-                              className={`${colors[idx] || 'bg-slate-400'} transition-all`}
-                              title={`${dist.label}: ${dist.count} (${dist.percentage}%)`}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 group-hover:text-emerald-700">
-                  <span className="text-[11px] font-medium">Inspect history & locations</span>
-                  <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      {/* Recent Feedback Stream & Quick Links */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Real-time Customer Feedback Snippets */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+      {/* 4. RECENT ACTIVITY & COLLECTION HEALTH */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Feedback Notes Stream */}
+        <section aria-labelledby="recent-feedback-heading" className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Recent Customer Submissions</h2>
-              <p className="text-xs text-slate-500">Live evidence stream from active doorways</p>
+              <h2 id="recent-feedback-heading" className="text-base font-bold text-slate-900">
+                Recent Customer Comments
+              </h2>
+              <p className="text-xs text-slate-500">
+                Direct thoughts shared by customers on their visits
+              </p>
             </div>
             <button
               onClick={() => onNavigateTab('activity')}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+              className="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1"
             >
-              View all sessions
+              <span>View All Activity</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            {recentSessions.slice(0, 3).map((session) => {
+          <div className="space-y-3">
+            {filteredSessions.filter((s) => s.optionalComment).slice(0, 3).map((session) => {
               const loc = locations.find((l) => l.id === session.locationId);
-              const overallAns = session.answers.find((a) => a.measureId === 'overall_experience');
-
+              const ep = endpoints.find((e) => e.id === session.endpointId);
               return (
-                <div key={session.id} className="py-3.5 first:pt-0 last:pb-0">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
+                <div
+                  key={session.id}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs space-y-2"
+                >
+                  <div className="flex items-center justify-between text-slate-500">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900">{loc?.name}</span>
-                      <span className="text-[11px] text-slate-500">• {session.timestamp}</span>
-                      <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
-                        via {session.channel}
-                      </span>
+                      <span className="font-semibold text-slate-800">{loc?.name}</span>
+                      <span>•</span>
+                      <span>{ep?.humanName}</span>
                     </div>
-
-                    {overallAns && (
-                      <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-100">
-                        {overallAns.selectedValue}
-                      </span>
-                    )}
+                    <span className="text-[11px]">{session.timestamp}</span>
                   </div>
-
-                  {session.optionalComment ? (
-                    <p className="text-xs text-slate-700 italic bg-slate-50/70 p-2.5 rounded-lg border border-slate-100/80">
-                      "{session.optionalComment}"
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {session.answers.slice(0, 3).map((ans) => (
-                        <span key={ans.measureId} className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                          {ans.selectedValue}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <p className="text-slate-800 font-medium italic leading-relaxed">
+                    "{session.optionalComment}"
+                  </p>
                 </div>
               );
             })}
-          </div>
-        </div>
 
-        {/* Prototype Guidance Card: The Fedoo Mental Model */}
-        <div className="bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between shadow-xs">
+            {filteredSessions.filter((s) => s.optionalComment).length === 0 && (
+              <div className="py-8 text-center text-xs text-slate-500">
+                No customer comments received yet for this scope.
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Feedback Points Collection Summary */}
+        <section aria-labelledby="feedback-points-heading" className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-3">
-              <Sparkles className="w-3 h-3 text-emerald-300" />
-              Governed Experience Architecture
+            <h2 id="feedback-points-heading" className="text-base font-bold text-slate-900 mb-1">
+              Feedback Points
+            </h2>
+            <p className="text-xs text-slate-500 mb-4">
+              Where customers can scan and share their thoughts
+            </p>
+
+            <div className="space-y-2.5">
+              {filteredEndpoints.slice(0, 3).map((ep) => (
+                <div
+                  key={ep.id}
+                  onClick={() => onSelectEndpoint(ep.id)}
+                  className="p-3 rounded-xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer flex items-center justify-between"
+                >
+                  <div className="min-w-0 pr-2">
+                    <div className="font-bold text-xs text-slate-900 truncate">
+                      {ep.humanName}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">
+                      {ep.totalResponses} responses • {ep.activeMeasureIds.length} questions
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                    ep.status === 'active' ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {ep.status === 'active' ? 'Active' : 'Paused'}
+                  </span>
+                </div>
+              ))}
             </div>
-            <h3 className="text-base font-bold text-white tracking-tight">
-              Evidence Before Judgement
-            </h3>
-            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-              Notice how Fedoo does not fabricate an opaque single "Fedoo Score", nor does it issue arbitrary advice like "train your staff".
-            </p>
-            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-              Instead, it preserves the integrity of individual Measures, displays volume-backed distributions, and distinguishes early signals from stable patterns.
-            </p>
           </div>
 
-          <div className="mt-5 pt-4 border-t border-slate-800 space-y-2">
+          <div className="pt-4 mt-4 border-t border-slate-100">
             <button
-              onClick={() => onNavigateTab('measures')}
-              className="w-full py-2 px-3 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl text-center transition-colors"
+              onClick={() => onNavigateTab('feedback-points')}
+              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
             >
-              Explore Measure Library
-            </button>
-            <button
-              onClick={() => onOpenParticipantSimulator()}
-              className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl text-center transition-colors"
-            >
-              Simulate Customer Scan
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Manage Feedback Points</span>
             </button>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

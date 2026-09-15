@@ -1,3 +1,12 @@
+// ============================================================================
+// FEDOO EXPERIENCE REFERENCE — DATA TYPES & INTERFACES
+// ============================================================================
+// [PROTOTYPE ASSUMPTION ANNOTATION]:
+// This module provides the experience model for Fedoo. In production, analytical
+// calculations (sufficiency, movement, review triggers) will be supplied by
+// the governed Fedoo engine rather than determined by the client application.
+// ============================================================================
+
 export type ScaleFamily = 'quality' | 'satisfaction' | 'likelihood';
 
 export interface ScaleOption {
@@ -8,9 +17,15 @@ export interface ScaleOption {
 
 export type BurdenLevel = 'quick' | 'standard' | 'extended';
 
-export type EndpointStatus = 'active' | 'paused' | 'ready' | 'draft';
+export type EndpointStatus = 'active' | 'paused' | 'draft';
 
-export type SufficiencyState = 'healthy' | 'early_signal' | 'limited_evidence' | 'insufficient_evidence';
+// Governed analytical states received from engine
+export type EvidenceLevel = 'sufficient' | 'limited' | 'none';
+export type MovementDirection = 'improving' | 'steady' | 'declining' | 'unavailable';
+export type ReviewState = 'needs_review' | 'clear';
+
+// Measure availability in customer context
+export type MeasureAvailability = 'available' | 'coming_soon' | 'not_relevant';
 
 export interface Measure {
   id: string;
@@ -19,6 +34,7 @@ export interface Measure {
   contextNotes: string;
   isCore: boolean;
   isRecommended: boolean;
+  availability: MeasureAvailability;
   standardQuestion: string;
   standardQuestionFr?: string;
   scaleFamily: ScaleFamily;
@@ -27,6 +43,13 @@ export interface Measure {
   comparableAcrossLocations: boolean;
   version: string;
   rationale?: string;
+}
+
+export interface EndpointConfigHistoryEntry {
+  id: string;
+  timestamp: string;
+  description: string;
+  activeMeasureIds: string[];
 }
 
 export interface Endpoint {
@@ -41,6 +64,7 @@ export interface Endpoint {
   totalResponses: number;
   burdenLevel: BurdenLevel;
   channelNotes?: string;
+  configHistory: EndpointConfigHistoryEntry[];
 }
 
 export interface Location {
@@ -68,22 +92,34 @@ export interface HistoryPoint {
   responses: number;
 }
 
+export interface NeedsReviewItem {
+  id: string;
+  measureId: string;
+  measureName: string;
+  locationId: string;
+  locationName: string;
+  headline: string;
+  explanation: string;
+  evidenceNote: string;
+  severity: 'high' | 'medium';
+}
+
 export interface ServiceSignal {
   measureId: string;
   locationId: string; // 'all' or specific locationId
   scoreLabel: string;
-  favourablePercentage: number;
+  favourablePercentage: number | null; // null if no evidence
   responseCount: number;
-  sufficiencyState: SufficiencyState;
-  periodChange?: {
-    deltaPoints: number;
-    direction: 'up' | 'down' | 'steady';
-    comparePeriodLabel: string;
+  evidenceLevel: EvidenceLevel;
+  movement: {
+    direction: MovementDirection;
+    deltaPoints?: number;
+    comparedToLabel?: string;
   };
   distribution: DistributionItem[];
-  historySeries: HistoryPoint[];
-  attentionFlag?: {
-    type: 'needs_review' | 'meaningful_change' | 'early_signal';
+  historySeries?: HistoryPoint[];
+  needsReview?: {
+    headline: string;
     explanation: string;
   };
 }
@@ -93,6 +129,7 @@ export interface FeedbackAnswer {
   questionText: string;
   selectedValue: string;
   scoreIndex: number;
+  required?: boolean;
 }
 
 export interface FeedbackSession {
@@ -119,5 +156,10 @@ export interface TeamMember {
   name: string;
   email: string;
   role: 'Organisation Admin' | 'Location Manager' | 'Service Observer';
-  locationScope: string; // 'All Locations' or specific location name
+  locationScope: string;
 }
+
+// Shell & Prototype Routing Types
+export type AppRoute = 'app' | 'setup' | 'feedback' | 'operator';
+export type AppTab = 'overview' | 'feedback-points' | 'what-we-track' | 'locations' | 'activity';
+export type PrototypeScenario = 'multi-location' | 'single-location' | 'empty-state';
