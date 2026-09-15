@@ -1,0 +1,6 @@
+{
+  "name": "Fedoo - Service Feedback Platform",
+  "description": "Experience Reference prototype establishing the product shell, governed Measures, persistent Endpoints, service signals, and participant feedback experience for Fedoo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
