@@ -86,7 +86,7 @@ export const ChangeWhatWeTrackView: React.FC<ChangeWhatWeTrackViewProps> = ({
             Change What We Track
           </h1>
           <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-            Select the service aspects you want customers to rate when scanning this feedback point.
+            Choose the Measures you want visibility on for this feedback point. Fedoo resolves the governed Instruments and assembles the Question Set — you never author canonical wording, scales, or compatibility.
           </p>
         </div>
 
@@ -192,7 +192,7 @@ export const ChangeWhatWeTrackView: React.FC<ChangeWhatWeTrackViewProps> = ({
                   Your QR Code & Direct Link Stay the Same
                 </h3>
                 <p className="text-emerald-900/80 leading-relaxed">
-                  Physical acrylic stands, stickers, and flyers already in your venue do not need reprinting. Customers will immediately see the updated questions when they scan.
+                  Physical acrylic stands, stickers, and flyers already in your venue do not need reprinting. Publishing creates or supersedes the governed configuration — future sessions use the new effective configuration, while past sessions retain their frozen lineage.
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export const ChangeWhatWeTrackView: React.FC<ChangeWhatWeTrackViewProps> = ({
                 className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md transition-colors flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Publish Updates Instantly</span>
+                <span>Publish Configuration</span>
               </button>
             </div>
           </div>

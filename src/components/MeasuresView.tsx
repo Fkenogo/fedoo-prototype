@@ -98,7 +98,7 @@ export const MeasuresView: React.FC<MeasuresViewProps> = ({
               What do you want visibility on?
             </h1>
             <p className="text-slate-600 text-sm mt-1 max-w-2xl">
-              Select the service dimensions you wish to understand. Fedoo determines the governed questions and scales, ensuring reliable comparability without survey fatigue.
+              Select the Measures you want visibility on (configuration intent). Fedoo resolves the governed Instruments and assembles the Question Set — comparability requires the same Measure, instrument version, scale and compatibility class.
             </p>
           </div>
 
@@ -292,7 +292,7 @@ export const MeasuresView: React.FC<MeasuresViewProps> = ({
             </div>
 
             <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-              Fedoo maintains governed Measures to guarantee statistical comparability and participant clarity. Tell us what you want to learn, and we’ll check if an existing Measure already addresses it.
+              Fedoo curates governed Measures with versioned Instruments. Tell us what you want to learn, and we’ll check if an existing Measure already addresses it — custom questions never auto-create Measures or comparability.
             </p>
 
             {/* Input Box */}
@@ -362,7 +362,7 @@ export const MeasuresView: React.FC<MeasuresViewProps> = ({
                   <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <span>
-                      Custom questions cannot be benchmarked against cross-location industry standards. Keep questions neutral, short, and use 5-point scales.
+                      Custom questions enter no governed denominator, signal or history and carry no cross-location comparability. Production allows at most one active custom question subject to entitlement; optional comment stays separate.
                     </span>
                   </div>
 

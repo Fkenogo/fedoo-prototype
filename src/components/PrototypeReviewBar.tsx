@@ -33,16 +33,16 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
   onResetData,
 }) => {
   return (
-    <aside aria-label="Prototype Evaluation Panel" className="bg-slate-950 text-white border-b border-slate-800 text-xs py-2 px-3 sm:px-6 sticky top-0 z-50 shadow-md">
+    <aside aria-label="Prototype Evaluation Panel (reference only — not production)" className="bg-slate-950 text-white border-b border-slate-800 text-xs py-2 px-3 sm:px-6 sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Left: Prototype Identifier */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-800/80 font-mono text-[11px] font-semibold">
             <Compass className="w-3.5 h-3.5 text-emerald-400" />
-            <span>FEDOO EXPERIENCE REFERENCE</span>
+            <span>FEDOO EXPERIENCE REFERENCE — PROTOTYPE</span>
           </div>
           <span className="hidden md:inline text-slate-400 text-[11px]">
-            Interactive Shell • Round 2
+            Scenario controls (REFERENCE) • Simulation data — not production
           </span>
         </div>
 
@@ -93,7 +93,7 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Fedoo Operator</span>
+            <span>Product Operations</span>
           </button>
         </nav>
 

@@ -2,9 +2,6 @@ import React from 'react';
 import { 
   ArrowLeft, 
   MapPin, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
   Info, 
   HelpCircle, 
   AlertTriangle,
@@ -109,7 +106,7 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
             <div className="w-px h-10 bg-slate-200" />
 
             <div className="space-y-1">
-              {/* Evidence badge */}
+              {/* Evidence facts (governed): exact counts, no quality score */}
               <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
                 evidence === 'sufficient'
                   ? 'bg-emerald-100 text-emerald-900'
@@ -117,11 +114,13 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
                   ? 'bg-amber-100 text-amber-900'
                   : 'bg-slate-100 text-slate-600'
               }`}>
-                {evidence === 'sufficient'
-                  ? 'Reliable picture'
-                  : evidence === 'limited'
-                  ? 'Early feedback'
-                  : 'No evidence yet'}
+                {signal?.responseCount || 0} responses
+                {evidence === 'none' ? ' • no evidence' : ''}
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {signal?.movement && signal.movement.direction !== 'unavailable' && signal.movement.deltaPoints !== undefined
+                  ? `${signal.movement.deltaPoints > 0 ? '+' : ''}${signal.movement.deltaPoints}pp ${signal.movement.comparedToLabel || 'vs comparison period'} (prototype simulation; comparison requires N≥10 in both periods)`
+                  : 'Comparison unavailable — insufficient evidence or no comparable period (prototype simulation)'}
               </div>
               <div className="text-xs text-slate-500 font-medium">
                 {signal?.responseCount || 0} customer responses
@@ -130,16 +129,20 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Needs Review Alert if present */}
+        {/* Flagged-for-review note (prototype simulation — non-authoritative) */}
         {signal?.needsReview && (
           <div className="mt-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-xs">
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <div className="font-bold text-amber-900">
-                {signal.needsReview.headline}
+                {signal.needsReview.headline}{' '}
+                <span className="font-semibold text-amber-800">(prototype simulation — non-authoritative)</span>
               </div>
               <div className="text-amber-800/90 mt-0.5 leading-relaxed">
                 {signal.needsReview.explanation}
+              </div>
+              <div className="text-[11px] text-amber-800/70 mt-1">
+                Production review/attention requires governed thresholds and is never derived client-side.
               </div>
             </div>
           </div>
@@ -199,12 +202,15 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900">
-              Performance by Location
+              Scores by Location
             </h2>
             <span className="text-xs text-slate-500">
-              Cross-location comparison
+              Separate per-location figures — not ranked
             </span>
           </div>
+          <p className="text-[11px] text-slate-500">
+            Each location shows its own favourable share and evidence count. Cross-location comparability in production requires the same Measure, instrument version, scale and compatibility class — this prototype assumes v1.0 throughout (simulation).
+          </p>
 
           <div className="space-y-3 pt-2">
             {locations.map((loc) => {
@@ -224,7 +230,7 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
                       <span>{loc.name}</span>
                     </div>
                     <div className="text-[11px] text-slate-500 mt-0.5">
-                      {locResponses} responses • {locSignal?.evidenceLevel === 'sufficient' ? 'Reliable' : 'Early data'}
+                      {locResponses} responses{locSignal?.evidenceLevel === 'none' ? ' • no evidence' : ''}
                     </div>
                   </div>
 
@@ -260,7 +266,7 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
             </p>
             {measure.standardQuestionFr && (
               <p className="font-serif italic text-xs text-slate-500">
-                French: "{measure.standardQuestionFr}"
+                French (prototype illustration only — deferred, no equivalence approved): "{measure.standardQuestionFr}"
               </p>
             )}
           </div>

@@ -1,11 +1,17 @@
 import { ServiceSignal, Measure } from '../types';
 
 /**
- * [PROTOTYPE ASSUMPTION ANNOTATION]:
- * This client helper simulates how a newly recorded customer feedback session
- * increments counts and recalculates sample distribution in the prototype.
- * In production Fedoo, signal aggregation, bayesian smoothing, and confidence
- * thresholds are computed authoritatively by the Fedoo backend engine.
+ * [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
+ * This client helper SIMULATES how a newly recorded customer feedback session
+ * increments counts in the prototype. It is NOT Product Truth.
+ * Production signal aggregation is computed authoritatively by the Fedoo
+ * backend engine (EA-04 Measure Result + EA-05 Service Signal):
+ *   - Descriptive display any N>0; N=0 → NO_EVIDENCE.
+ *   - Period comparison requires N>=10 in BOTH periods (EA-05 v1).
+ *   - Movement = raw percentage-point delta only (no Improving/Declining/
+ *     Stable, no material-movement, no attention, no statistical claims).
+ * The evidenceLevel assigned below is a prototype placeholder so fixtures
+ * render; production evidence/comparison state comes from the engine.
  */
 export function recalculateSignalWithSession(
   currentSignal: ServiceSignal,
@@ -39,7 +45,9 @@ export function recalculateSignalWithSession(
     favourablePercentage: newFavourablePercentage,
     scoreLabel: `${newFavourablePercentage}% Favourable`,
     distribution: updatedDistribution,
-    // Simulated prototype analytical state:
+    // Simulated prototype evidence marker ONLY (non-authoritative).
+    // Production: N>0 → descriptive display; comparison gated on N>=10 in
+    // BOTH periods. Never present this threshold as a quality/reliability score.
     evidenceLevel: newResponseCount >= 40 ? 'sufficient' : 'limited',
   };
 }

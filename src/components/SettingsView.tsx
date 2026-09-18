@@ -236,9 +236,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Tab 3: Language */}
       {activeSettingsTab === 'language' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs max-w-2xl space-y-4">
-          <h2 className="text-base font-bold text-slate-900">Language Governance</h2>
+          <h2 className="text-base font-bold text-slate-900">Language</h2>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Fedoo supports bilingual operations (English & French) across East, West, and Central African markets. Governed questions maintain calibrated equivalency across both languages.
+            This shell demonstrates English/French presentation as an experience pattern. Governed measurement languages are separate Instruments: only English v1 is approved in current Product Truth — French measurement equivalence is deferred and not approved.
           </p>
 
           <div className="space-y-3 pt-2 text-xs">
@@ -251,8 +251,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 className="text-emerald-700 focus:ring-emerald-700"
               />
               <div>
-                <span className="font-bold text-slate-900">English (Primary default)</span>
-                <p className="text-slate-500 text-[11px]">Approved v1.0 standard formulations</p>
+                <span className="font-bold text-slate-900">English (shell default)</span>
+                <p className="text-slate-500 text-[11px]">Organisation-facing presentation language (experience pattern)</p>
               </div>
             </label>
 
@@ -265,8 +265,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 className="text-emerald-700 focus:ring-emerald-700"
               />
               <div>
-                <span className="font-bold text-slate-900">Français (French)</span>
-                <p className="text-slate-500 text-[11px]">Approved v1.0 French equivalents</p>
+                <span className="font-bold text-slate-900">Français (shell pattern)</span>
+                <p className="text-slate-500 text-[11px]">Presentation pattern only — French measurement Instruments deferred, no equivalence approved</p>
               </div>
             </label>
           </div>

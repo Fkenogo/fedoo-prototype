@@ -59,7 +59,13 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
   const handleExit = onExit || onClose || (() => {});
   const handleSubmitSession = onRecordSession || onSubmitFeedback || (() => {});
 
-  // Active measures configured for this feedback point
+  // Experience Reference binding (Product Truth realignment):
+  // Production: Endpoint → Effective Configuration → Immutable Effective
+  // Session Composition → governed Question/Scale. The organisation chooses
+  // Measures (configuration intent); Fedoo resolves governed Instruments and
+  // assembles the Question Set. This prototype SIMULATES that resolution from
+  // local fixtures (endpoint.activeMeasureIds + SCALE_DEFINITIONS) — the
+  // browser never defines scales in production.
   const activeMeasures = measures.filter((m) =>
     endpoint.activeMeasureIds.includes(m.id)
   );
@@ -345,6 +351,9 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
       {/* Participant Footer */}
       <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/50 text-center text-[10px] text-slate-400">
         Private customer feedback • Powered by Fedoo
+        <span className="block text-[10px] text-slate-400 mt-0.5">
+          Prototype simulation — questions/scales shown from local fixtures; production resolves the governed Effective Session Composition.
+        </span>
       </div>
     </div>
   );

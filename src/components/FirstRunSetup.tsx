@@ -97,7 +97,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   Understand how customers experience your service.
                 </h1>
                 <p className="text-slate-600 text-sm mt-2 max-w-xl leading-relaxed">
-                  Fedoo replaces complex survey forms with standardized service questions and permanent table QR codes. You stay in control of what you measure.
+                  Fedoo replaces complex survey forms with standardized service questions and permanent table QR codes. You choose what you want visibility on; Fedoo resolves the governed questions and scales.
                 </p>
               </div>
 
@@ -107,7 +107,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                     1
                   </div>
                   <h2 className="font-bold text-slate-900">Choose What to Understand</h2>
-                  <p className="text-slate-500 mt-1">Select key service drivers like Speed or Staff Courtesy.</p>
+                  <p className="text-slate-500 mt-1">Select Measures like Speed or Staff Courtesy — Fedoo resolves the governed questions.</p>
                 </div>
 
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
@@ -122,8 +122,8 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold mb-3">
                     3
                   </div>
-                  <h2 className="font-bold text-slate-900">See Live Service Results</h2>
-                  <p className="text-slate-500 mt-1">Receive ratings, detect bottlenecks, and celebrate staff.</p>
+                  <h2 className="font-bold text-slate-900">See Service Results</h2>
+                  <p className="text-slate-500 mt-1">Receive ratings and factual evidence summaries for your team.</p>
                 </div>
               </div>
 
@@ -150,7 +150,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   Tell us about your business
                 </h2>
                 <p className="text-slate-600 text-xs mt-1">
-                  We suggest relevant questions tailored to your service type.
+                  Fedoo suggests suitable Measures for your service type, drawn in production from governed applicability and configuration — you never author canonical wording, scales, or compatibility.
                 </p>
               </div>
 
@@ -217,13 +217,13 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
             <div className="space-y-6 animate-in fade-in duration-200">
               <div>
                 <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
-                  Recommended Questions
+                  Suggested Measures
                 </span>
                 <h2 className="text-2xl font-bold text-slate-900 mt-1">
-                  What do you want to understand?
+                  What do you want visibility on?
                 </h2>
                 <p className="text-slate-600 text-xs mt-1">
-                  Here is the recommended question set for hospitality. You can adjust this anytime:
+                  Prototype illustration of Fedoo-suggested Measures for hospitality. Production resolves governed Instruments and assembles the Question Set — you can adjust this anytime:
                 </p>
               </div>
 

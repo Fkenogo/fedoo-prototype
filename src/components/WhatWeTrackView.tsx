@@ -81,7 +81,7 @@ export const WhatWeTrackView: React.FC<WhatWeTrackViewProps> = ({
             Available Service Measures ({availableMeasures.length})
           </h2>
           <p className="text-xs text-slate-500">
-            Standard measures validated for customer service environments
+            Measures you can choose for visibility — Fedoo resolves the governed questions, scales and compatibility
           </p>
         </div>
 
