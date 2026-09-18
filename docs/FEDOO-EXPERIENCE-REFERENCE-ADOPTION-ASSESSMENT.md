@@ -57,11 +57,11 @@
 | 10 | Feedback Point configuration (Change What We Track + history) | ADAPT | QR persistence ADOPT; Publish/history semantics realigned (G). |
 | 11 | Improving / Steady / Declining movement pills | ADAPT (was REJECT as labels) | Labels removed; replaced with factual raw pp delta + comparison-availability note (B). Smallest adjustment, visual hierarchy kept. |
 | 12 | “Reliable picture” / “Early feedback” universal quality badges | ADAPT | Removed as quality scores; replaced with exact evidence counts (`N responses`, `no evidence`) and N≥10 comparison rule (B/C). |
-| 13 | “Needs Review” analytical triggers / “All clear … no bottlenecks” conclusions | ADAPT | Kept as explicitly-marked prototype simulation interaction; production attention requires governed thresholds (B). “All clear”/bottleneck language removed. |
+| 13 | Attention / “flagged for review” organisation-visible capability | REFERENCE / UNRESOLVED ASSUMPTION | Interaction pattern retained for future Attention work only (isolated `AttentionReferencePanel`, reachable exclusively via prototype review tooling, default OFF). NOT part of the adopted bounded production Overview. Production inclusion requires a later Founder/Product decision with governed Attention semantics. |
 | 14 | French formulations presented as approved equivalents; “Approved v1.0 FR” | ADAPT | Marked prototype illustration only; FR Instruments deferred, no equivalence approved (H/I). Shell EN/FR toggle kept as presentation pattern only. |
 | 15 | “Unconditional Cross-Location” / “statistical validity” / “Immutable v1.0” / “Benchmarked” | ADAPT | Removed; replaced with same-Measure+version+scale+compat-class rule, versioned lifecycle (H). |
 | 16 | Platform Operator (narrow read-only governance shell) | ADAPT (largest) | Replaced with Product Operations control-plane experience: Measures, instruments, scales, languages/equivalence, applicability, templates/pools, lifecycle, provenance, diagnostics, audit; unavailable capabilities disabled and marked; no permissions invented (H). |
-| 17 | Prototype scenario/review controls, device toggle, reset, toasts, mock data | REFERENCE | Kept visually separable (top dark bar, PROTOTYPE badges); mock data labelled simulation; calculations non-authoritative (STEP 4). |
+| 17 | Prototype scenario/review controls, device toggle, reset, toasts, mock data | REFERENCE | Kept visually separable (top dark bar, PROTOTYPE badges); mock data labelled simulation; calculations non-authoritative. The future-state Attention reference toggle lives here (Overview route only, default OFF). |
 | 18 | Opaque overall/org-wide scores, benchmarks/ranks, recommendations, causal explanations | REJECT | None carried forward: no composite scores exist; no ranked cross-location product; no benchmarks; no causality/staff-blame (B). |
 | 19 | Universal descriptive-evidence quality score (threshold-based “reliability”) | REJECT | Rejected as a concept; only governed rule is N≥10 for period comparison (C). |
 | 20 | Client-authored canonical wording / scales / compatibility / Question Set semantics | REJECT | Users must not author these; interface hides mechanics (D). |
@@ -78,12 +78,19 @@
    N>0 descriptive, N=0 NO_EVIDENCE, comparison gated N≥10 both periods. Adjustment: exact counts
    (`N responses`, `no evidence`) + comparison-availability line. No production doc amendment needed
    (prototype threshold was never Product Truth).
-3. **Review/attention section.** Prototype: “Needs Review” triggers + “All clear. No bottlenecks…”.
-   Truth: attention requires sufficient evidence, centrally governed thresholds, class-separated;
-   org cannot set flags; missing flags prove nothing. Adjustment: section kept as marked simulation
-   (“Flagged for review — prototype simulation, non-authoritative” + explainer); “All clear”/
-   bottleneck language removed. Production needs a governed attention adapter; experience interaction
-   (flag → drill-down) is retained.
+3. **Review/attention surface (DECOUPLED from default Overview).** The adopted default
+   Organisation Overview contains no Attention / flagged-for-review section and its headline
+   is driven only by factual governed output (response counts, feedback points, measures,
+   distributions, raw pp movement, evidence/comparison states). The review/attention
+   interaction design is preserved as `src/components/AttentionReferencePanel.tsx` —
+   REFERENCE ONLY, rendered exclusively when prototype review tooling enables it
+   (`showAttentionReference`, default OFF, toggled from the prototype review bar), visually
+   separated (dashed REFERENCE frame) and labelled non-authoritative. “All clear”/bottleneck
+   language is removed everywhere. Production inclusion of any organisation-visible attention
+   requires a later Founder/Product decision with governed Attention semantics; the adopted
+   bounded Overview must not structurally depend on it. Production will still need a governed
+   attention adapter if/when that decision lands — the retained reference interaction shows
+   where such a surface would dock.
 4. **First-run setup.** Prototype: “detect bottlenecks”, “recommended question set”, client-shaped
    Measure choice implying authored questions. Truth: Fedoo suggests Measures from governed
    applicability; Fedoo resolves Instruments/Question Set. Adjustment: copy realigned, bottleneck
@@ -127,9 +134,12 @@
 
 ## Unresolved Founder assumptions
 
-1. **Attention design:** prototype retains a “flagged for review” interaction as simulation. Founder
-   decision needed on whether production ships any organisation-visible attention surface in the
-   bounded scope, and if so under which governed class/thresholds (OAA-001 vs deferred Attention).
+1. **Attention design:** the Attention / flagged-for-review interaction is now DECOUPLED from
+   the adopted default Overview and retained as REFERENCE ONLY (`AttentionReferencePanel`,
+   prototype-tooling-gated, default OFF). Founder decision still needed on whether production
+   ever ships an organisation-visible attention surface, and if so under which governed
+   class/thresholds (OAA-001 vs deferred Attention). Until then, the bounded production Overview
+   excludes it structurally.
 2. **French shell scope:** EN/FR shell toggle kept as presentation pattern. Founder decision needed
    on whether bilingual shell ships at launch or English-only, independent of deferred measurement FR.
 3. **Custom-question entitlement UX:** prototype states the ≤1/entitlement/comment-separation rule in
@@ -139,9 +149,11 @@
 ## Confirmations
 
 - [x] Unsupported analytics removed or marked non-authoritative: movement labels, material-movement,
-  attention, “Needs Review” as truth, “All clear”, bottleneck claims, recommendations, causal
+  “All clear” conclusions, bottleneck claims, recommendations, causal
   explanations, benchmarks/ranks, opaque scores, universal quality thresholds — all removed from
-  authoritative surfaces or explicitly badged prototype simulation.
+  authoritative surfaces. Organisation-visible Attention is DECOUPLED from the adopted default
+  Overview entirely (headline + section removed); the interaction survives only as an explicitly
+  labelled REFERENCE panel behind prototype tooling.
 - [x] Participant flow binds conceptually to governed session composition: Endpoint → Effective
   Configuration → Immutable Effective Session Composition → governed Question/Scale; browser
   fixtures annotated simulation-only; no UUIDs in customer surfaces.
@@ -159,7 +171,7 @@
 
 - Organisation shell / navigation / scope switching: **ADOPT**
 - Overview / Feedback Points / What We Track / Locations / Activity: **ADOPT WITH ADAPTATIONS**
-  (factual labels only; structure preserved)
+  (factual labels only, Attention decoupled from the default Overview; structure preserved)
 - First-run setup: **ADOPT WITH ADAPTATIONS**
 - Participant feedback: **ADOPT WITH ADAPTATIONS**
 - Feedback Point configuration: **ADOPT WITH ADAPTATIONS**

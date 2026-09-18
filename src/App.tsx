@@ -98,6 +98,11 @@ export default function App() {
   const [isCreateEndpointModalOpen, setIsCreateEndpointModalOpen] = useState(false);
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
 
+  // REFERENCE ONLY (prototype review tooling): toggles the future-state
+  // Attention interaction inside the Organisation Overview. Default OFF —
+  // never part of the adopted production Overview. See AttentionReferencePanel.
+  const [showAttentionReference, setShowAttentionReference] = useState<boolean>(false);
+
   // Live toast notifications
   const [liveToast, setLiveToast] = useState<string | null>(null);
 
@@ -353,6 +358,8 @@ export default function App() {
         participantViewMode={participantViewMode}
         onParticipantViewModeChange={setParticipantViewMode}
         onResetData={handleResetData}
+        showAttentionReference={showAttentionReference}
+        onToggleAttentionReference={() => setShowAttentionReference((v) => !v)}
       />
 
       {/* 2. LIVE TOAST NOTIFICATION */}
@@ -519,6 +526,7 @@ export default function App() {
                 onNavigateTab={(tab) => handleTabChange(tab)}
                 onSelectEndpoint={(id) => setSelectedEndpointId(id)}
                 onStartSetup={() => setCurrentRoute('setup')}
+                showAttentionReference={showAttentionReference}
               />
             ) : activeTab === 'feedback-points' ? (
               /* TAB 2: FEEDBACK POINTS */
