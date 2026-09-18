@@ -1,10 +1,21 @@
 // ============================================================================
 // FEDOO EXPERIENCE REFERENCE — DATA TYPES & INTERFACES
 // ============================================================================
-// [PROTOTYPE ASSUMPTION ANNOTATION]:
-// This module provides the experience model for Fedoo. In production, analytical
-// calculations (sufficiency, movement, review triggers) will be supplied by
-// the governed Fedoo engine rather than determined by the client application.
+// [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
+// This module provides the EXPERIENCE model for Fedoo, not Product Truth.
+// In production, all analytical output is supplied by the governed Fedoo
+// engine (EA-01→EA-06 at acb054a):
+//   Measures / Instruments / Question Set / Effective Configuration /
+//   Session Composition / Submission-Acceptance-Evidence / Measure Results /
+//   Service Signals / Signal History.
+// Client-side movement labels, sufficiency thresholds, review triggers,
+// scores and comparability claims below are PROTOTYPE SIMULATION ONLY and
+// must not be presented as production authority. Governed rules:
+//   - Favourable = points 4+5 on Higher-favourable 5-pt families only.
+//   - Descriptive display any N>0; N=0 → NO_EVIDENCE (never 0%).
+//   - Period comparison requires N>=10 in BOTH periods (EA-05 v1).
+//   - Movement is a raw percentage-point delta, never Improving/Stable/
+//     Declining, material-movement, attention or statistical claims.
 // ============================================================================
 
 export type ScaleFamily = 'quality' | 'satisfaction' | 'likelihood';
@@ -19,9 +30,25 @@ export type BurdenLevel = 'quick' | 'standard' | 'extended';
 
 export type EndpointStatus = 'active' | 'paused' | 'draft';
 
-// Governed analytical states received from engine
+// Governed analytical states — PROTOTYPE SIMULATION ONLY (non-authoritative).
+// Production uses EA-04/EA-05 states: EVIDENCE_AVAILABLE / NO_EVIDENCE,
+// COMPARISON_AVAILABLE / COMPARISON_UNAVAILABLE (insufficient evidence) /
+// NO_COMPARABLE_SERIES / SERIES_BREAK. The labels below exist only to drive
+// prototype fixtures and must be rendered as factual evidence counts.
 export type EvidenceLevel = 'sufficient' | 'limited' | 'none';
+// DEPRECATED prototype simulation: never render Improving/Stable/Declining in
+// production. Production renders raw pp delta + comparison state only.
 export type MovementDirection = 'improving' | 'steady' | 'declining' | 'unavailable';
+// Governed comparison state for the Experience Reference (factual only).
+export type ComparisonState =
+  | 'AVAILABLE'
+  | 'INSUFFICIENT_EVIDENCE'
+  | 'NO_EVIDENCE'
+  | 'SERIES_BREAK'
+  | 'UNAVAILABLE';
+// DEPRECATED prototype simulation flag: production attention requires governed
+// thresholds and is never derived client-side. Render as "flagged for review
+// (prototype simulation — non-authoritative)" where shown.
 export type ReviewState = 'needs_review' | 'clear';
 
 // Measure availability in customer context
@@ -110,11 +137,17 @@ export interface ServiceSignal {
   scoreLabel: string;
   favourablePercentage: number | null; // null if no evidence
   responseCount: number;
-  evidenceLevel: EvidenceLevel;
+  evidenceLevel: EvidenceLevel; // prototype simulation of EA-04/EA-05 evidence state
+  // Governed comparison (factual): raw pp delta only; direction labels are
+  // prototype simulation and must not be carried into production.
   movement: {
-    direction: MovementDirection;
-    deltaPoints?: number;
+    direction: MovementDirection; // DEPRECATED simulation — render factually
+    deltaPoints?: number; // raw percentage-point delta vs comparison period
     comparedToLabel?: string;
+    // Factual governed rendering (preferred): e.g. "+3.0pp vs previous 30 days
+    // (comparison available, N>=10 both periods)" or "comparison unavailable —
+    // insufficient evidence".
+    comparisonState?: ComparisonState;
   };
   distribution: DistributionItem[];
   historySeries?: HistoryPoint[];

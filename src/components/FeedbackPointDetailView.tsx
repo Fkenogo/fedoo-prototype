@@ -158,7 +158,7 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
                 </div>
               </div>
               <div className="text-[11px] font-mono text-slate-500 mt-2">
-                ID: {endpoint.id}
+                Persistent QR identity — reprint never required
               </div>
             </div>
 
@@ -197,7 +197,7 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
               <span>Permanent QR Code</span>
             </div>
             <p className="text-emerald-900/80 leading-relaxed">
-              This QR code and web link stay constant forever. When you update questions or change what you track, you do not need to replace physical table stands or stickers.
+              This QR code and web link stay constant forever. Publishing creates or supersedes the governed configuration — future sessions use the new effective configuration, while existing sessions and history retain their frozen lineage. You do not need to replace physical table stands or stickers.
             </p>
           </div>
         </div>
@@ -261,7 +261,7 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
             </div>
           </div>
 
-          {/* Configuration History: Transparent updates timeline */}
+          {/* Configuration History: governed lineage (prototype simulation) */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 text-slate-500" />
@@ -269,6 +269,9 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
                 Configuration History
               </h2>
             </div>
+            <p className="text-[11px] text-slate-500">
+              Each publish supersedes the governed configuration for future sessions. Past sessions keep their frozen effective configuration (prototype illustrates the lineage interaction).
+            </p>
 
             <div className="space-y-3">
               {endpoint.configHistory && endpoint.configHistory.length > 0 ? (
@@ -312,7 +315,7 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
                     className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5"
                   >
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="font-mono text-[11px]">{s.id}</span>
+                      <span className="text-[11px]">Response {s.timestamp}</span>
                       <span className="text-[11px]">{s.timestamp}</span>
                     </div>
                     {s.optionalComment && (

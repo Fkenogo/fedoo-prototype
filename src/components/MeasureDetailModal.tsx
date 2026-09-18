@@ -336,7 +336,7 @@ export const MeasureDetailModal: React.FC<MeasureDetailModalProps> = ({
 
                 {measure.standardQuestionFr && (
                   <div>
-                    <div className="font-semibold text-slate-700">French Equivalent (FR v1):</div>
+                    <div className="font-semibold text-slate-700">French text (prototype illustration — deferred, no equivalence approved):</div>
                     <div className="mt-1 p-2.5 bg-white rounded-lg border border-slate-200 font-medium text-slate-800 italic">
                       "{measure.standardQuestionFr}"
                     </div>
@@ -349,15 +349,15 @@ export const MeasureDetailModal: React.FC<MeasureDetailModalProps> = ({
                     <p className="text-slate-600 mt-0.5">{measure.scaleFamily} (5-point unipolar/bipolar ordered)</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-slate-700">Cross-Sector Comparability:</span>
+                    <span className="font-semibold text-slate-700">Comparability (prototype illustration):</span>
                     <p className="text-slate-600 mt-0.5">
-                      {measure.comparableAcrossLocations ? 'Benchmarked across matching operating types' : 'Organisation internal only'}
+                      {measure.comparableAcrossLocations ? 'Same instrument version, scale and compatibility class required — no unconditional cross-location comparability' : 'Organisation internal only in this illustration'}
                     </p>
                   </div>
                 </div>
 
                 <div className="p-3 bg-emerald-50 text-emerald-950 rounded-xl border border-emerald-200 leading-relaxed">
-                  <strong>Measurement Governance Rule:</strong> Organisations choose what they want visibility on; Fedoo determines the exact governed wording and response scale to guarantee validity and comparability across locations and time.
+                  <strong>Measurement Governance Rule:</strong> Organisations choose Measures for visibility (configuration intent); Fedoo resolves governed Instruments and assembles the Question Set. Comparability requires the same Measure, instrument version, scale and compatibility class.
                 </div>
               </div>
             )}

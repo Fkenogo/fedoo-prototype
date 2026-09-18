@@ -6,11 +6,7 @@ import {
   SlidersHorizontal, 
   Clock, 
   AlertTriangle, 
-  CheckCircle2,
-  ChevronRight,
-  TrendingUp,
-  TrendingDown,
-  Minus
+  ChevronRight
 } from 'lucide-react';
 import { Location, Endpoint, Measure, ServiceSignal, FeedbackSession, NeedsReviewItem } from '../types';
 
@@ -106,12 +102,13 @@ export const LocationDetailView: React.FC<LocationDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Needs Review Alert for this location */}
+        {/* Flagged-for-review note for this location (prototype simulation) */}
         {locNeedsReview.length > 0 && (
           <div className="mt-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>1 Area Needs Review at this Location</span>
+              <span>{locNeedsReview.length} {locNeedsReview.length === 1 ? 'item' : 'items'} flagged for review at this location</span>
+              <span className="font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">prototype simulation</span>
             </div>
             {locNeedsReview.map((item) => (
               <div
@@ -182,7 +179,7 @@ export const LocationDetailView: React.FC<LocationDetailViewProps> = ({
                 Customer Experience Picture
               </h2>
               <p className="text-xs text-slate-500">
-                Favourable scores for measures tracked at {location.name}
+                Favourable share and evidence count per measure at {location.name} (factual figures; no analytical ranking)
               </p>
             </div>
           </div>
@@ -205,7 +202,7 @@ export const LocationDetailView: React.FC<LocationDetailViewProps> = ({
                       {measure.name}
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      {signal?.responseCount || 0} responses • {signal?.evidenceLevel === 'sufficient' ? 'Reliable' : 'Early signal'}
+                      {signal?.responseCount || 0} responses
                     </div>
                   </div>
 

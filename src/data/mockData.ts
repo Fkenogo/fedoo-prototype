@@ -1,11 +1,17 @@
 // ============================================================================
-// FEDOO EXPERIENCE REFERENCE — MOCK DATA & FIXTURES
+// FEDOO EXPERIENCE REFERENCE — MOCK DATA & FIXTURES (SIMULATION DATA)
 // ============================================================================
-// [PROTOTYPE ASSUMPTION ANNOTATION]:
-// These fixtures demonstrate Fedoo in populated, limited, and empty states.
-// In the future production engine, analytical calculations, evidence levels,
-// and movement directions will be produced server-side by Fedoo's statistical
-// and governance engines.
+// [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
+// SIMULATION DATA ONLY — not production authority. These fixtures demonstrate
+// populated, limited, and empty experience states. In production, Measures,
+// Instruments, Question Sets, Measure Results, Service Signals and Signal
+// History are supplied by the governed Fedoo engine (EA-01→EA-06 at acb054a).
+// Fixture evidence levels, movement directions, review flags, French
+// formulations and comparability poses below are prototype illustrations and
+// must not be read as governed truth. Mock-data calculations are never
+// production authority.
+// Governed reminders: favourable = 4+5 only; comparison requires N>=10 in
+// BOTH periods; movement is raw pp delta; French Instruments deferred.
 // ============================================================================
 
 import { 
@@ -360,7 +366,9 @@ export const MULTI_LOCATION_ENDPOINTS: Endpoint[] = [
   },
 ];
 
-// Needs Review items for Manager Overview
+// Flagged-for-review items (PROTOTYPE SIMULATION ONLY — non-authoritative).
+// Illustrate the review interaction; production attention requires governed
+// thresholds and is never derived client-side.
 export const MULTI_LOCATION_NEEDS_REVIEW: NeedsReviewItem[] = [
   {
     id: 'rev-speed-airport',
@@ -368,9 +376,9 @@ export const MULTI_LOCATION_NEEDS_REVIEW: NeedsReviewItem[] = [
     measureName: 'Speed of Service',
     locationId: 'loc-airport',
     locationName: 'Airport Concourse',
-    headline: 'Lower ratings reported during midday flight rush',
-    explanation: 'Over the last 14 days, satisfaction with service speed dropped to 62% favourable at the Airport Concourse, primarily between 11:30 and 14:00.',
-    evidenceNote: '48 responses in the last 14 days • Sufficient evidence',
+    headline: 'Lower favourable share at Airport Concourse in the last 14 days (simulation)',
+    explanation: 'Prototype simulation: 62% favourable for service speed at the Airport Concourse over the last 14 days. No causal claim is made.',
+    evidenceNote: '48 responses in the last 14 days (prototype simulation — non-authoritative)',
     severity: 'high',
   },
 ];
@@ -496,8 +504,8 @@ export const MULTI_LOCATION_SIGNALS: Record<string, ServiceSignal> = {
       { period: 'Aug', favourablePercentage: 76, responses: 314 },
     ],
     needsReview: {
-      headline: 'Drop in wait satisfaction at Airport Concourse',
-      explanation: 'Recent customer responses at the airport location highlight queue and prep bottlenecks during lunch transit hours.',
+      headline: 'Lower favourable share for wait satisfaction at Airport Concourse (simulation)',
+      explanation: 'Prototype simulation: 62% favourable (48 responses) at this location in the last 14 days. No causal or bottleneck claim is made.',
     },
   },
   'speed_of_service_loc-main': {
@@ -544,8 +552,8 @@ export const MULTI_LOCATION_SIGNALS: Record<string, ServiceSignal> = {
       { period: 'Aug', favourablePercentage: 62, responses: 92 },
     ],
     needsReview: {
-      headline: 'Midday rush wait times',
-      explanation: 'Customer ratings drop noticeably during 11:30 - 14:00 flight transit rush.',
+      headline: 'Lower favourable share for wait satisfaction at Airport Concourse (simulation)',
+      explanation: 'Prototype simulation: lower favourable share in the 11:30–14:00 window. No causal or bottleneck claim is made.',
     },
   },
   'speed_of_service_loc-city': {
