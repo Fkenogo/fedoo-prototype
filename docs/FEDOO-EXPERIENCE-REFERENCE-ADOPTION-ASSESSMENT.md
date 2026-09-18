@@ -4,6 +4,9 @@
 - Fedoo Product Truth baseline: `acb054a1fc6bb5501fe123f988d55e77f1a71ea3` (origin/main, read-only authority — not changed)
 - Branch: `feat/product-truth-experience-realignment`
 - Date (UTC): 2026-09-18
+- **Adoption status:** APPROVED — ADOPTED AS FEDOO EXPERIENCE REFERENCE WITH SPECIFIED ADAPTATIONS
+- **Founder adoption record:** `docs/FEDOO-EXPERIENCE-REFERENCE-ADOPTION-DECISION.md`
+- **Approved reviewed prototype head:** `f0bf54dac08da4988a688bc35c93237b9e6e8d37`
 - Rule applied: preserve the approved experience unless doing so would introduce a material
   security, integrity, privacy, or product-scope risk. Where production lacks a convenient
   API/read model, that is recorded as “production needs an adapter” — not a reason to degrade
@@ -67,7 +70,7 @@
 | 20 | Client-authored canonical wording / scales / compatibility / Question Set semantics | REJECT | Users must not author these; interface hides mechanics (D). |
 | 21 | Endpoint UUID/technical identity exposure (`ID: ep-…`, session IDs) | ADAPT | Removed from customer-facing surfaces; persistent human QR identity shown instead (E/G). Internal keys remain in fixtures only. |
 
-## All ADAPT items and why
+## ADAPT items and why
 
 1. **Movement labels (Overview cards).** Prototype: emerald “improving” / rose “declining” / slate
    “steady” pills with `%`. Truth: EA-05 prohibits these labels and material-movement thresholds;
@@ -78,53 +81,54 @@
    N>0 descriptive, N=0 NO_EVIDENCE, comparison gated N≥10 both periods. Adjustment: exact counts
    (`N responses`, `no evidence`) + comparison-availability line. No production doc amendment needed
    (prototype threshold was never Product Truth).
-3. **Review/attention surface (DECOUPLED from default Overview).** The adopted default
-   Organisation Overview contains no Attention / flagged-for-review section and its headline
-   is driven only by factual governed output (response counts, feedback points, measures,
-   distributions, raw pp movement, evidence/comparison states). The review/attention
-   interaction design is preserved as `src/components/AttentionReferencePanel.tsx` —
-   REFERENCE ONLY, rendered exclusively when prototype review tooling enables it
-   (`showAttentionReference`, default OFF, toggled from the prototype review bar), visually
-   separated (dashed REFERENCE frame) and labelled non-authoritative. “All clear”/bottleneck
-   language is removed everywhere. Production inclusion of any organisation-visible attention
-   requires a later Founder/Product decision with governed Attention semantics; the adopted
-   bounded Overview must not structurally depend on it. Production will still need a governed
-   attention adapter if/when that decision lands — the retained reference interaction shows
-   where such a surface would dock.
-4. **First-run setup.** Prototype: “detect bottlenecks”, “recommended question set”, client-shaped
+3. **First-run setup.** Prototype: “detect bottlenecks”, “recommended question set”, client-shaped
    Measure choice implying authored questions. Truth: Fedoo suggests Measures from governed
    applicability; Fedoo resolves Instruments/Question Set. Adjustment: copy realigned, bottleneck
    promise removed, sector select labelled prototype illustration. Docs: OOS-001 onboarding model may
    need later amendment if it implies client-authored content (flagged, not changed here).
-5. **Participant flow binding.** Prototype: `endpoint.activeMeasureIds` → browser `SCALE_DEFINITIONS`.
+4. **Participant flow binding.** Prototype: `endpoint.activeMeasureIds` → browser `SCALE_DEFINITIONS`.
    Truth: Endpoint → Effective Configuration → Immutable Effective Session Composition → governed
    Question/Scale. Adjustment: flow preserved; code + footer annotated as simulation; conceptual
    binding documented; UUIDs hidden. Production needs an assembly-resolution adapter — not a reason
    to degrade the flow.
-6. **Feedback Point Publish/history.** Prototype: “Publish Updates Instantly … customers immediately
+5. **Feedback Point Publish/history.** Prototype: “Publish Updates Instantly … customers immediately
    see updated questions”. Truth: publish creates/supersedes governed configuration; future sessions
    use the new effective configuration; history retains frozen lineage. Adjustment: copy + history
    section realigned; QR persistence (ADOPT) untouched.
-7. **Operator → Product Operations.** Prototype: narrow catalogue viewer with French-v1.0,
+6. **Operator → Product Operations.** Prototype: narrow catalogue viewer with French-v1.0,
    unconditional comparability, statistical validity, immutable v1.0. Truth: none of those claims
    hold; curation spans Measures → templates → lifecycle → diagnostics/audit. Adjustment: full
    control-plane experience rewrite with section tabs, deferred-FR marking, versioned lifecycle,
    disabled publish/audit actions. No permissions or backend invented.
-8. **Language.** Prototype: shell toggle + “Approved v1.0 French equivalents” + calibrated
+7. **Language.** Prototype: shell toggle + “Approved v1.0 French equivalents” + calibrated
    equivalency claim. Truth: EN v1 only; FR deferred; translation ≠ equivalence. Adjustment: shell
    localisation kept as presentation pattern; all measurement-FR surfaces marked illustration-only.
    Production docs (MIB/MQL language sections) need no change; if any older doc implies approved FR,
    it is flagged for later amendment.
-9. **Technical identity exposure.** Prototype displayed `ID: {endpoint.id}` and session IDs.
+8. **Technical identity exposure.** Prototype displayed `ID: {endpoint.id}` and session IDs.
    Adjustment: replaced with persistent-QR-identity language; no UUIDs in customer surfaces.
 
-## All REJECT items and why
+## REFERENCE / UNRESOLVED items
 
-- **Improving/Stable/Declining, Material Movement, Attention, “Needs Review” as analytical truth,
-  “All clear” conclusions, bottleneck detection, recommendations, causal explanations,
-  benchmark/rank claims, opaque overall scores.** Each invents domain authority, measurement
-  semantics or analytical meaning the bounded engine does not authorise (EA-04/EA-05 prohibitions).
-  Removed or demoted to marked simulation; no production implementation may rely on them.
+1. **Attention / flagged-for-review surface.** The adopted default Organisation Overview contains no
+   Attention / flagged-for-review section and its headline is driven only by factual governed output.
+   The interaction design is preserved as `src/components/AttentionReferencePanel.tsx`, rendered only
+   when prototype review tooling enables it (`showAttentionReference`, default OFF), visually separated
+   and labelled non-authoritative. Production inclusion requires a later Founder/Product decision with
+   governed Attention semantics.
+2. **French shell launch scope.** The EN/FR shell toggle remains an experience pattern; production
+   launch scope remains a later Founder/Product decision and is independent of deferred measurement-FR
+   Instrument/equivalence authority.
+3. **Custom-question intake UX.** Product Truth permits bounded custom-question capability under
+   entitlement, but the prototype does not make it operable. Whether the bounded release exposes that
+   intake UX remains a later Founder/Product decision.
+
+## REJECT items and why
+
+- **Improving/Stable/Declining, Material Movement, Attention as analytical truth, “All clear” conclusions,
+  bottleneck detection, recommendations, causal explanations, benchmark/rank claims, opaque overall
+  scores.** Each invents domain authority, measurement semantics or analytical meaning the bounded
+  engine does not authorise. Removed from adopted production surfaces.
 - **Universal “Reliable picture / Early feedback” quality score.** Rejected as a concept — current
   approved comparison rule is N≥10 for period comparison, not a descriptive-evidence quality score.
 - **Client-authored canonical wording/scales/compatibility/Question Set semantics.** Rejected —
@@ -132,28 +136,13 @@
 - **Approved French formulations / unconditional comparability / statistical-validity guarantees /
   immutable v1.0.** Rejected as claims — FR deferred, comparability class-bound, lifecycle versioned.
 
-## Unresolved Founder assumptions
-
-1. **Attention design:** the Attention / flagged-for-review interaction is now DECOUPLED from
-   the adopted default Overview and retained as REFERENCE ONLY (`AttentionReferencePanel`,
-   prototype-tooling-gated, default OFF). Founder decision still needed on whether production
-   ever ships an organisation-visible attention surface, and if so under which governed
-   class/thresholds (OAA-001 vs deferred Attention). Until then, the bounded production Overview
-   excludes it structurally.
-2. **French shell scope:** EN/FR shell toggle kept as presentation pattern. Founder decision needed
-   on whether bilingual shell ships at launch or English-only, independent of deferred measurement FR.
-3. **Custom-question entitlement UX:** prototype states the ≤1/entitlement/comment-separation rule in
-   copy but offers no operable flow. Founder decision needed on whether the bounded release exposes
-   custom-question intake at all.
-
 ## Confirmations
 
 - [x] Unsupported analytics removed or marked non-authoritative: movement labels, material-movement,
-  “All clear” conclusions, bottleneck claims, recommendations, causal
-  explanations, benchmarks/ranks, opaque scores, universal quality thresholds — all removed from
-  authoritative surfaces. Organisation-visible Attention is DECOUPLED from the adopted default
-  Overview entirely (headline + section removed); the interaction survives only as an explicitly
-  labelled REFERENCE panel behind prototype tooling.
+  “All clear” conclusions, bottleneck claims, recommendations, causal explanations, benchmarks/ranks,
+  opaque scores, universal quality thresholds — all removed from authoritative surfaces. Organisation-
+  visible Attention is decoupled from the adopted default Overview entirely; the interaction survives
+  only as an explicitly labelled REFERENCE panel behind prototype tooling.
 - [x] Participant flow binds conceptually to governed session composition: Endpoint → Effective
   Configuration → Immutable Effective Session Composition → governed Question/Scale; browser
   fixtures annotated simulation-only; no UUIDs in customer surfaces.
@@ -163,8 +152,7 @@
   provenance, draft/review/publish, diagnostics, audit; unavailable capabilities disabled/marked;
   unsupported claims removed.
 - [x] Responsive/mobile: participant phone/standalone toggle retained and still fully responsive;
-  dashboard grids (`md:`/`lg:` breakpoints, max-w containers, overflow-safe cards) untouched —
-  no regression introduced (build passes; manual responsive check recommended in review).
+  dashboard grids (`md:`/`lg:` breakpoints, max-w containers, overflow-safe cards) untouched.
 - [x] Production repository untouched: all work on `Fkenogo/fedoo-prototype` branch only.
 
 ## Per-area adoption verdict
@@ -178,10 +166,14 @@
 - Product Operations (ex-Operator): **ADOPT WITH ADAPTATIONS** (largest realignment, done)
 - Scenario/review controls + mock data: **REFERENCE** (kept separable, non-authoritative)
 
-## Final recommendation
+## Final adoption disposition
 
-**ADOPT WITH SPECIFIED ADAPTATIONS** — the prototype as realigned on this branch is fit to serve
-as the Fedoo Experience Reference for production assembly, with production binding governed truth
-(EA-01→EA-06) behind the preserved experience via adapters/read models, and the three Founder
-assumptions above resolved before production reliance on attention, French shell scope, and
-custom-question intake.
+**ADOPTED AS FEDOO EXPERIENCE REFERENCE WITH SPECIFIED ADAPTATIONS.**
+
+Founder approval was recorded on 18 September 2026 against reviewed prototype head
+`f0bf54dac08da4988a688bc35c93237b9e6e8d37`; see
+`docs/FEDOO-EXPERIENCE-REFERENCE-ADOPTION-DECISION.md`.
+
+The approved Experience Reference now governs production experience assembly, while governed Product
+Truth (EA-01→EA-06 and subsequent approved authorities) remains controlling for domain semantics,
+security, integrity, permissions, lifecycle and authoritative analytical meaning.
