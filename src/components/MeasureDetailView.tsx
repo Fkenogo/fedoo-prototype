@@ -6,9 +6,9 @@ import {
   Plus,
   QrCode,
   ChevronRight,
-  AlertTriangle,
 } from 'lucide-react';
 import { Measure, ServiceSignal, Location, FeedbackSession, Endpoint } from '../types';
+import { summarizeDistribution, comparisonAvailable } from '../utils/feedbackUtils';
 
 interface MeasureDetailViewProps {
   measure: Measure;
@@ -50,6 +50,10 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
   const responses = signal?.responseCount || 0;
   const favourable = signal?.favourablePercentage;
   const distribution = signal?.distribution || [];
+  const summary = summarizeDistribution(measure, signal);
+  const canCompare = comparisonAvailable(signal);
+  const delta = signal?.movement?.deltaPoints;
+  const [showCalculation, setShowCalculation] = useState(false);
 
   const trackingEndpoints = endpoints.filter((ep) =>
     ep.activeMeasureIds.includes(measure.id)
@@ -95,16 +99,6 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
             {measure.shortDescription}
           </p>
         </div>
-
-        {signal?.needsReview && (
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-xs">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div className="text-amber-800/90 leading-relaxed">
-              {signal.needsReview.headline}{' '}
-              <span className="font-semibold">(prototype simulation — non-authoritative)</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Where you're tracking it */}
@@ -236,16 +230,23 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
               </div>
               <div className="w-px h-10 bg-slate-200" />
               <div className="text-xs text-slate-500">
-                <div className="font-bold text-slate-900">{responses} responses</div>
+                <div className="font-bold text-slate-900">
+                  {responses} response{responses === 1 ? '' : 's'}
+                </div>
                 <div className="mt-0.5">
-                  {signal?.movement && signal.movement.direction !== 'unavailable' && signal.movement.deltaPoints !== undefined
-                    ? `${signal.movement.deltaPoints > 0 ? '+' : ''}${signal.movement.deltaPoints}pp ${
-                        signal.movement.comparedToLabel || 'vs comparison period'
-                      } (prototype simulation)`
-                    : 'Comparison unavailable — insufficient evidence (prototype simulation)'}
+                  {canCompare && delta !== undefined
+                    ? `${delta > 0 ? `+${delta}` : `−${Math.abs(delta)}`}pp vs previous period`
+                    : 'Not enough feedback to compare periods yet'}
                 </div>
               </div>
             </div>
+
+            {summary.total > 0 && (
+              <div className="text-xs text-slate-600">
+                Favourable {summary.favourablePct}% · Middle {summary.middlePct}% · Unfavourable{' '}
+                {summary.unfavourablePct}%
+              </div>
+            )}
 
             {distribution.length > 0 && (
               <div className="space-y-3 pt-1">
@@ -267,6 +268,24 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
                 ))}
               </div>
             )}
+
+            {/* Read-only calculation explanation */}
+            <div className="pt-1">
+              <button
+                onClick={() => setShowCalculation((v) => !v)}
+                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1"
+              >
+                <Info className="w-3.5 h-3.5" />
+                <span>How this is calculated</span>
+              </button>
+              {showCalculation && (
+                <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                  Customers answer a five-point question. Ratings of 4 and 5 count as favourable,
+                  3 as middle, and 1 and 2 as unfavourable. Fedoo applies the appropriate question
+                  and scale for this area.
+                </p>
+              )}
+            </div>
 
             {commentsForMeasure.length > 0 && (
               <div className="space-y-2 pt-1">

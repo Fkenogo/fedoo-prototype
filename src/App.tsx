@@ -114,6 +114,9 @@ export default function App() {
     useState<'active' | 'paused' | null>(null);
   const [participantUnavailable, setParticipantUnavailable] = useState(false);
 
+  // Pass 5 overview review tooling: force the no-evidence experience state.
+  const [overviewNoEvidence, setOverviewNoEvidence] = useState(false);
+
   // Modals
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
   // Pass 3: lightweight "where would you like to track this?" flow.
@@ -538,6 +541,8 @@ export default function App() {
         onToggleParticipantPreviewMode={() => setParticipantPreviewMode((v) => !v)}
         participantUnavailable={participantUnavailable}
         onToggleParticipantUnavailable={() => setParticipantUnavailable((v) => !v)}
+        overviewNoEvidence={overviewNoEvidence}
+        onToggleOverviewNoEvidence={() => setOverviewNoEvidence((v) => !v)}
       />
 
       {/* 2. LIVE TOAST NOTIFICATION */}
@@ -754,6 +759,7 @@ export default function App() {
             ) : activeTab === 'overview' ? (
               /* TAB 1: OVERVIEW DASHBOARD */
               <OverviewView
+                organisationName={organisation.name}
                 currentScope={currentScope}
                 scopeLocationName={scopeLocationName}
                 locations={locations}
@@ -767,7 +773,9 @@ export default function App() {
                 onSelectEndpoint={(id) => setSelectedEndpointId(id)}
                 onStartSetup={() => setCurrentRoute('setup')}
                 onCreateFeedbackPoint={openFeedbackPointWizard}
+                onTestAsCustomer={() => openParticipantPreview(endpoints[0]?.id ?? null)}
                 showAttentionReference={showAttentionReference}
+                noEvidenceOverride={overviewNoEvidence}
               />
             ) : activeTab === 'feedback-points' ? (
               /* TAB 2: FEEDBACK POINTS */

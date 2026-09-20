@@ -22,7 +22,9 @@ import {
   FeedbackSession, 
   Organisation, 
   TeamMember,
-  NeedsReviewItem
+  NeedsReviewItem,
+  ScaleFamily,
+  DistributionItem
 } from '../types';
 
 export const SCALE_DEFINITIONS = {
@@ -1439,8 +1441,8 @@ export const VERA_BEAUTY_ORGANISATION: Organisation = {
       type: 'physical',
       addressOrDetail: 'Bujumbura',
       managerName: 'Vera Niyonkuru',
-      totalResponses: 0,
-      lastFeedbackAt: null,
+      totalResponses: 21,
+      lastFeedbackAt: '2 hours ago',
       endpointsCount: 2,
       activeMeasuresCount: 6,
       status: 'active',
@@ -1460,8 +1462,8 @@ export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [
     activeMeasureIds: ['overall_experience', 'staff_courtesy', 'wait_experience'],
     supportedChannels: ['qr', 'link'],
     createdAt: '12 Sep',
-    lastResponseAt: null,
-    totalResponses: 0,
+    lastResponseAt: '2 hours ago',
+    totalResponses: 14,
     burdenLevel: 'quick',
     contextNote: 'At the reception counter after customers finish their visit.',
     friendlyLink: 'fedoo.me/vera-main-counter',
@@ -1483,8 +1485,8 @@ export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [
     activeMeasureIds: ['overall_experience', 'treatment_service_result', 'practitioner_skill', 'treatment_comfort'],
     supportedChannels: ['qr'],
     createdAt: '12 Sep',
-    lastResponseAt: null,
-    totalResponses: 0,
+    lastResponseAt: '1 day ago',
+    totalResponses: 7,
     burdenLevel: 'standard',
     contextNote: 'At the styling chair as customers finish their treatment.',
     friendlyLink: 'fedoo.me/vera-treatment-exit',
@@ -1499,7 +1501,47 @@ export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [
     ],
   },
 ];
-export const VERA_BEAUTY_SESSIONS: FeedbackSession[] = [];
+export const VERA_BEAUTY_SESSIONS: FeedbackSession[] = [
+  {
+    id: 'sess-vera-501',
+    endpointId: 'ep-vera-main-counter',
+    locationId: 'loc-vera-main',
+    timestamp: '2 hours ago',
+    channel: 'qr',
+    optionalComment: 'The team was welcoming and my braids look exactly how I asked.',
+    answers: [
+      { measureId: 'overall_experience', questionText: 'Overall Experience', selectedValue: 'Excellent', scoreIndex: 5 },
+      { measureId: 'staff_courtesy', questionText: 'Staff Courtesy', selectedValue: 'Very satisfied', scoreIndex: 5 },
+      { measureId: 'wait_experience', questionText: 'Wait Experience', selectedValue: 'Satisfied', scoreIndex: 4 },
+    ],
+  },
+  {
+    id: 'sess-vera-500',
+    endpointId: 'ep-vera-main-counter',
+    locationId: 'loc-vera-main',
+    timestamp: 'Yesterday',
+    channel: 'link',
+    optionalComment: 'Waited a little before being seated, but the result was worth it.',
+    answers: [
+      { measureId: 'overall_experience', questionText: 'Overall Experience', selectedValue: 'Good', scoreIndex: 4 },
+      { measureId: 'staff_courtesy', questionText: 'Staff Courtesy', selectedValue: 'Satisfied', scoreIndex: 4 },
+      { measureId: 'wait_experience', questionText: 'Wait Experience', selectedValue: 'Dissatisfied', scoreIndex: 2 },
+    ],
+  },
+  {
+    id: 'sess-vera-499',
+    endpointId: 'ep-vera-treatment-exit',
+    locationId: 'loc-vera-main',
+    timestamp: '1 day ago',
+    channel: 'qr',
+    optionalComment: 'My stylist explained each step and checked the length with me before cutting.',
+    answers: [
+      { measureId: 'overall_experience', questionText: 'Overall Experience', selectedValue: 'Excellent', scoreIndex: 5 },
+      { measureId: 'treatment_service_result', questionText: 'Treatment / Service Result', selectedValue: 'Very satisfied', scoreIndex: 5 },
+      { measureId: 'practitioner_skill', questionText: 'Practitioner Skill', selectedValue: 'Excellent', scoreIndex: 5 },
+    ],
+  },
+];
 export const VERA_BEAUTY_NEEDS_REVIEW: NeedsReviewItem[] = [];
 
 // ---------------------------------------------------------------------------
@@ -1519,8 +1561,8 @@ export const CITY_CLINIC_ORGANISATION: Organisation = {
       type: 'physical',
       addressOrDetail: 'Bujumbura',
       managerName: 'Dr. Alain Bizimana',
-      totalResponses: 0,
-      lastFeedbackAt: null,
+      totalResponses: 6,
+      lastFeedbackAt: 'Today',
       endpointsCount: 1,
       activeMeasuresCount: 4,
       status: 'active',
@@ -1537,8 +1579,8 @@ export const CITY_CLINIC_ENDPOINTS: Endpoint[] = [
     activeMeasureIds: ['overall_experience', 'appointment_access', 'wait_experience', 'privacy'],
     supportedChannels: ['qr', 'link'],
     createdAt: '12 Sep',
-    lastResponseAt: null,
-    totalResponses: 0,
+    lastResponseAt: 'Today',
+    totalResponses: 6,
     burdenLevel: 'standard',
     contextNote: 'At reception as patients leave the clinic.',
     friendlyLink: 'fedoo.me/city-reception',
@@ -1553,7 +1595,34 @@ export const CITY_CLINIC_ENDPOINTS: Endpoint[] = [
     ],
   },
 ];
-export const CITY_CLINIC_SESSIONS: FeedbackSession[] = [];
+export const CITY_CLINIC_SESSIONS: FeedbackSession[] = [
+  {
+    id: 'sess-clinic-201',
+    endpointId: 'ep-clinic-reception',
+    locationId: 'loc-clinic-main',
+    timestamp: 'Today',
+    channel: 'qr',
+    optionalComment: 'Reception explained the waiting time clearly and the consultation was thorough.',
+    answers: [
+      { measureId: 'overall_experience', questionText: 'Overall Experience', selectedValue: 'Excellent', scoreIndex: 5 },
+      { measureId: 'appointment_access', questionText: 'Appointment Access', selectedValue: 'Satisfied', scoreIndex: 4 },
+      { measureId: 'wait_experience', questionText: 'Wait Experience', selectedValue: 'Satisfied', scoreIndex: 4 },
+      { measureId: 'privacy', questionText: 'Privacy', selectedValue: 'Very satisfied', scoreIndex: 5 },
+    ],
+  },
+  {
+    id: 'sess-clinic-200',
+    endpointId: 'ep-clinic-reception',
+    locationId: 'loc-clinic-main',
+    timestamp: 'Yesterday',
+    channel: 'link',
+    optionalComment: 'Getting an appointment took a few calls.',
+    answers: [
+      { measureId: 'overall_experience', questionText: 'Overall Experience', selectedValue: 'Good', scoreIndex: 4 },
+      { measureId: 'appointment_access', questionText: 'Appointment Access', selectedValue: 'Dissatisfied', scoreIndex: 2 },
+    ],
+  },
+];
 export const CITY_CLINIC_NEEDS_REVIEW: NeedsReviewItem[] = [];
 
 // Builds a zero-evidence signal map for a location (prototype simulation).
@@ -1597,8 +1666,85 @@ export function buildEmptySignals(locationId: string): Record<string, ServiceSig
   return signals;
 }
 
-export const VERA_BEAUTY_SIGNALS: Record<string, ServiceSignal> = buildEmptySignals('loc-vera-main');
-export const CITY_CLINIC_SIGNALS: Record<string, ServiceSignal> = buildEmptySignals('loc-clinic-main');
+// ---------------------------------------------------------------------------
+// PASS 5 — OVERVIEW / SIGNAL PRESENTATION FIXTURES (prototype reference data)
+// ---------------------------------------------------------------------------
+// [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
+// These fixtures exist ONLY to make Overview experience states testable
+// (descriptive evidence, valid movement, unavailable comparison, no evidence).
+// They are not Product Truth. Production computes Measure Results and Service
+// Signals in the governed engine; movement is a raw pp delta shown only when
+// comparison is valid. No scores, benchmarks, causality or recommendations.
+// ---------------------------------------------------------------------------
+
+// Builds a signal from ordered per-scale-option counts (5-point scales).
+function buildSignal(
+  measureId: string,
+  locationId: string,
+  scaleFamily: ScaleFamily,
+  counts: number[],
+  movement?: { deltaPoints: number }
+): ServiceSignal {
+  const scale = SCALE_DEFINITIONS[scaleFamily];
+  const total = counts.reduce((a, b) => a + b, 0);
+  const distribution: DistributionItem[] = scale.map((opt, i) => {
+    const count = counts[i] ?? 0;
+    return {
+      label: opt.value,
+      count,
+      percentage: total > 0 ? Math.round((count / total) * 1000) / 10 : 0,
+    };
+  });
+  const favourableCount = scale.reduce(
+    (sum, opt, i) => sum + (opt.scoreIndex >= 4 ? counts[i] ?? 0 : 0),
+    0
+  );
+  const favourablePercentage = total > 0 ? Math.round((favourableCount / total) * 100) : undefined;
+
+  return {
+    measureId,
+    locationId,
+    scoreLabel: total > 0 ? `${favourablePercentage}% Favourable` : 'No responses yet',
+    favourablePercentage,
+    responseCount: total,
+    evidenceLevel: total === 0 ? 'none' : total >= 40 ? 'sufficient' : 'limited',
+    movement: movement
+      ? { direction: 'steady', deltaPoints: movement.deltaPoints, comparedToLabel: 'previous period' }
+      : { direction: 'unavailable' },
+    distribution,
+  };
+}
+
+// Vera Beauty — early evidence. Some measures have data with a valid
+// comparison, some have data without a valid comparison (insufficient
+// period counts), and some have no data yet.
+export const VERA_BEAUTY_SIGNALS: Record<string, ServiceSignal> = {
+  'overall_experience_loc-vera-main': buildSignal('overall_experience', 'loc-vera-main', 'quality', [9, 6, 2, 1, 0], { deltaPoints: 4 }),
+  'staff_courtesy_loc-vera-main': buildSignal('staff_courtesy', 'loc-vera-main', 'satisfaction', [8, 5, 2, 1, 0], { deltaPoints: 2 }),
+  'wait_experience_loc-vera-main': buildSignal('wait_experience', 'loc-vera-main', 'satisfaction', [3, 3, 1, 1, 0]),
+  'treatment_service_result_loc-vera-main': buildSignal('treatment_service_result', 'loc-vera-main', 'satisfaction', [5, 3, 1, 0, 0]),
+  'practitioner_skill_loc-vera-main': buildSignal('practitioner_skill', 'loc-vera-main', 'quality', [0, 0, 0, 0, 0]),
+  'treatment_comfort_loc-vera-main': buildSignal('treatment_comfort', 'loc-vera-main', 'satisfaction', [0, 0, 0, 0, 0]),
+  'overall_experience_all': buildSignal('overall_experience', 'all', 'quality', [9, 6, 2, 1, 0], { deltaPoints: 4 }),
+  'staff_courtesy_all': buildSignal('staff_courtesy', 'all', 'satisfaction', [8, 5, 2, 1, 0], { deltaPoints: 2 }),
+  'wait_experience_all': buildSignal('wait_experience', 'all', 'satisfaction', [3, 3, 1, 1, 0]),
+  'treatment_service_result_all': buildSignal('treatment_service_result', 'all', 'satisfaction', [5, 3, 1, 0, 0]),
+  'practitioner_skill_all': buildSignal('practitioner_skill', 'all', 'quality', [0, 0, 0, 0, 0]),
+  'treatment_comfort_all': buildSignal('treatment_comfort', 'all', 'satisfaction', [0, 0, 0, 0, 0]),
+};
+
+// City Clinic — limited evidence. Descriptive results only; comparison is
+// unavailable because period counts are below the governed threshold.
+export const CITY_CLINIC_SIGNALS: Record<string, ServiceSignal> = {
+  'overall_experience_loc-clinic-main': buildSignal('overall_experience', 'loc-clinic-main', 'quality', [3, 2, 1, 0, 0]),
+  'appointment_access_loc-clinic-main': buildSignal('appointment_access', 'loc-clinic-main', 'satisfaction', [2, 1, 1, 1, 0]),
+  'wait_experience_loc-clinic-main': buildSignal('wait_experience', 'loc-clinic-main', 'satisfaction', [0, 0, 0, 0, 0]),
+  'privacy_loc-clinic-main': buildSignal('privacy', 'loc-clinic-main', 'satisfaction', [0, 0, 0, 0, 0]),
+  'overall_experience_all': buildSignal('overall_experience', 'all', 'quality', [3, 2, 1, 0, 0]),
+  'appointment_access_all': buildSignal('appointment_access', 'all', 'satisfaction', [2, 1, 1, 1, 0]),
+  'wait_experience_all': buildSignal('wait_experience', 'all', 'satisfaction', [0, 0, 0, 0, 0]),
+  'privacy_all': buildSignal('privacy', 'all', 'satisfaction', [0, 0, 0, 0, 0]),
+};
 
 export const SINGLE_LOCATION_SESSIONS: FeedbackSession[] = [
   {
