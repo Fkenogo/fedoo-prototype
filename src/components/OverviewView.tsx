@@ -18,7 +18,7 @@ import {
   AppTab,
 } from '../types';
 import { AttentionReferencePanel } from './AttentionReferencePanel';
-import { summarizeDistribution, comparisonAvailable } from '../utils/feedbackUtils';
+import { summarizeDistribution, comparisonAvailable, resolveRecency } from '../utils/feedbackUtils';
 
 interface OverviewViewProps {
   organisationName?: string;
@@ -50,23 +50,6 @@ interface OverviewViewProps {
 // as a single source of truth so an authoritative period selector can replace
 // it once production read models provide period-specific evidence.
 const PERIOD_CONTEXT_LABEL = 'Last 30 days';
-
-// Parses fixture recency labels to an approximate age in minutes so the most
-// recent available timestamp can be identified. Returns null when a label
-// cannot be reliably ordered.
-function recencyMinutes(label: string | null | undefined): number | null {
-  if (!label) return null;
-  const l = label.trim().toLowerCase();
-  if (l === 'just now' || l === 'today') return 0;
-  if (l === 'yesterday') return 24 * 60;
-  const m = l.match(/^(\d+)\s*(min|mins|minute|minutes)\s+ago$/);
-  if (m) return Number(m[1]);
-  const h = l.match(/^(\d+)\s*(hour|hours|hr|hrs)\s+ago$/);
-  if (h) return Number(h[1]) * 60;
-  const d = l.match(/^(\d+)\s*(day|days)\s+ago$/);
-  if (d) return Number(d[1]) * 24 * 60;
-  return null;
-}
 
 // Overview: a calm operating picture of customer feedback. It presents
 // factual evidence only — no universal score, no benchmark, no causality, no
@@ -113,19 +96,14 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   // Most recent available fixture timestamp in scope. Only claim "latest" when
   // every candidate timestamp can be reliably ordered; otherwise fall back to
   // a neutral recency line. Never shown when there is no evidence.
-  const recency = useMemo(() => {
-    const candidates = [
-      ...filteredEndpoints.map((e) => e.lastResponseAt),
-      ...filteredSessions.map((s) => s.timestamp),
-    ].filter((t): t is string => Boolean(t));
-    if (candidates.length === 0) return { kind: 'none' as const, label: null as string | null };
-    const parsed = candidates.map((label) => ({ label, minutes: recencyMinutes(label) }));
-    if (parsed.every((p) => p.minutes !== null)) {
-      const latest = parsed.reduce((a, b) => ((a.minutes as number) <= (b.minutes as number) ? a : b));
-      return { kind: 'latest' as const, label: latest.label };
-    }
-    return { kind: 'recent' as const, label: null };
-  }, [filteredEndpoints, filteredSessions]);
+  const recency = useMemo(
+    () =>
+      resolveRecency([
+        ...filteredEndpoints.map((e) => e.lastResponseAt),
+        ...filteredSessions.map((s) => s.timestamp),
+      ]),
+    [filteredEndpoints, filteredSessions]
+  );
 
   const activeMeasureIds = Array.from(new Set(filteredEndpoints.flatMap((e) => e.activeMeasureIds)));
   const activeMeasures = measures.filter((m) => activeMeasureIds.includes(m.id));

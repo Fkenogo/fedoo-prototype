@@ -116,6 +116,8 @@ export default function App() {
 
   // Pass 5 overview review tooling: force the no-evidence experience state.
   const [overviewNoEvidence, setOverviewNoEvidence] = useState(false);
+  // Pass 6 activity review tooling: force the genuine no-activity state.
+  const [activityEmptyOverride, setActivityEmptyOverride] = useState(false);
 
   // Modals
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
@@ -211,6 +213,12 @@ export default function App() {
     setParticipantUnavailable(false);
   };
 
+  // Pass 6: add a Location (no Feedback Point required, no approval).
+  const handleCreateLocation = (newLocation: Location) => {
+    setLocations((prev) => [...prev, newLocation]);
+    showToast(`${newLocation.name} added. You can add a Feedback Point whenever you're ready.`);
+  };
+
   // Opens the Pass 2 guided First Feedback Point flow.
   const openFeedbackPointWizard = () => {
     setSelectedEndpointId(null);
@@ -219,6 +227,13 @@ export default function App() {
     setIsChangingWhatWeTrack(false);
     setCurrentRoute('feedback-point-setup');
     window.scrollTo({ top: 0 });
+  };
+
+  // Pass 6: create a Feedback Point from a Location, scoped to that Location.
+  const openFeedbackPointWizardForLocation = (locationId: string) => {
+    setSelectedLocationId(null);
+    setCurrentScope(locationId);
+    openFeedbackPointWizard();
   };
 
   const handleResetData = () => {
@@ -543,6 +558,8 @@ export default function App() {
         onToggleParticipantUnavailable={() => setParticipantUnavailable((v) => !v)}
         overviewNoEvidence={overviewNoEvidence}
         onToggleOverviewNoEvidence={() => setOverviewNoEvidence((v) => !v)}
+        activityEmpty={activityEmptyOverride}
+        onToggleActivityEmpty={() => setActivityEmptyOverride((v) => !v)}
       />
 
       {/* 2. LIVE TOAST NOTIFICATION */}
@@ -749,12 +766,20 @@ export default function App() {
                 location={selectedLocation}
                 endpoints={endpoints}
                 measures={measures}
-                signals={signals}
                 recentSessions={sessions}
-                needsReviewItems={needsReviewItems}
                 onBack={() => setSelectedLocationId(null)}
                 onSelectEndpoint={(epId) => setSelectedEndpointId(epId)}
-                onSelectMeasure={(mId) => setSelectedMeasureId(mId)}
+                onCreateFeedbackPoint={() => openFeedbackPointWizardForLocation(selectedLocation.id)}
+                onViewActivity={() => {
+                  setCurrentScope(selectedLocation.id);
+                  setSelectedLocationId(null);
+                  handleTabChange('activity');
+                }}
+                onViewLocationOverview={() => {
+                  setCurrentScope(selectedLocation.id);
+                  setSelectedLocationId(null);
+                  handleTabChange('overview');
+                }}
               />
             ) : activeTab === 'overview' ? (
               /* TAB 1: OVERVIEW DASHBOARD */
@@ -808,7 +833,12 @@ export default function App() {
               <LocationsView
                 locations={locations}
                 endpoints={endpoints}
+                sessions={sessions}
                 onSelectLocation={(locId) => setSelectedLocationId(locId)}
+                onCreateLocation={handleCreateLocation}
+                hasMoreLocationsHint={
+                  organisation.onboardingData?.hasMoreLocations === 'yes' && locations.length === 1
+                }
               />
             ) : activeTab === 'activity' ? (
               /* TAB 5: RECENT CUSTOMER ACTIVITY */
@@ -819,6 +849,9 @@ export default function App() {
                 measures={measures}
                 currentScope={currentScope}
                 scopeLocationName={scopeLocationName}
+                forceEmpty={activityEmptyOverride}
+                onViewFeedbackPoints={() => handleTabChange('feedback-points')}
+                onTestAsCustomer={() => openParticipantPreview(endpoints[0]?.id ?? null)}
               />
             ) : (
               /* TAB 6: SETTINGS */
