@@ -192,6 +192,7 @@ export interface OnboardingData {
   websiteOrSocial?: string;
   sector: string;
   category: string;
+  customSectorDescription?: string;
   services: string[];
   serviceModels: string[];
   contextualAnswers: Record<string, string>;
@@ -201,6 +202,7 @@ export interface OnboardingData {
   hasMoreLocations: 'no' | 'yes';
   timezone: string;
   timezoneLabel: string;
+  timezoneId?: string;
   adminName: string;
   adminEmail: string;
   adminPhone?: string;

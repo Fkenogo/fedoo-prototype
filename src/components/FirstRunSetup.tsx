@@ -76,31 +76,25 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
       firstLocationCity: prev.firstLocationCity || (matchedCountry ? matchedCountry.defaultCity : ''),
       timezone: matchedCountry ? matchedCountry.tzOffset : prev.timezone,
       timezoneLabel: matchedCountry ? matchedCountry.timezone : prev.timezoneLabel,
+      timezoneId: matchedCountry ? matchedCountry.tzId : prev.timezoneId,
     }));
   };
 
   // Auto-adapt when sector changes
   const handleSectorChange = (sectorName: string) => {
     const nextSectorConfig = ONBOARDING_SECTORS.find((s) => s.name === sectorName) || ONBOARDING_SECTORS[0];
-    const defaultCategory = nextSectorConfig.categories[0] || '';
-    const initialServices = nextSectorConfig.serviceExamples.slice(0, 3);
     const defaultPlaceholder = nextSectorConfig.defaultLocationPlaceholder;
-
-    // Reset contextual answers to defaults for the new sector
-    const newContextAnswers: Record<string, string> = {};
-    nextSectorConfig.contextQuestions.forEach((q) => {
-      newContextAnswers[q.id] = q.options[0] || '';
-    });
 
     setFormData((prev) => ({
       ...prev,
       sector: sectorName,
-      category: defaultCategory,
-      services: initialServices,
+      category: '', // Prompt user to choose their category
+      customSectorDescription: sectorName === 'Another service business' ? (prev.customSectorDescription || '') : undefined,
+      services: [], // Prompt user to select their services
       firstLocationName: prev.firstLocationName === '' || prev.firstLocationName === currentSectorConfig.defaultLocationPlaceholder
         ? defaultPlaceholder
         : prev.firstLocationName,
-      contextualAnswers: newContextAnswers,
+      contextualAnswers: {}, // Prompt user to answer contextual questions
     }));
   };
 
@@ -172,16 +166,25 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
 
   return (
     <div className="w-full max-w-3xl mx-auto py-4 sm:py-8 px-3 sm:px-6">
-      {/* 0. FOUNDER REVIEW SCENARIO SWITCHER (PROTOTYPE CONTROLS) */}
+      {/* 0. FOUNDER REVIEW SCENARIO SWITCHER (PROTOTYPE CONTROLS ONLY - NOT PRODUCTION UI) */}
       <aside 
-        aria-label="Founder Review Presets"
-        className="mb-4 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-md text-white"
+        aria-label="Prototype Review Tooling"
+        className="mb-4 bg-slate-900/95 border-2 border-dashed border-amber-500/40 rounded-2xl p-3 shadow-md text-white"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-800 text-[11px]">
-          <div className="flex items-center gap-1.5 font-medium text-emerald-400">
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span className="font-bold">Founder Review Presets:</span>
-            <span className="text-slate-400 hidden md:inline">Instantly test sector adaptations</span>
+        <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-800">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span>Prototype Review Tooling — Not Production UI</span>
+          </div>
+          <span className="text-[10px] text-slate-400 hidden sm:inline">
+            Use to preview different sectors & step flows
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-800/80 text-[11px]">
+          <div className="flex items-center gap-1.5 font-medium text-slate-300">
+            <Sparkles className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+            <span className="font-semibold text-white">Review Presets:</span>
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -189,7 +192,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
               onClick={() => loadPreset('vera-beauty')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 formData.organisationName === 'Vera Beauty'
-                  ? 'bg-emerald-600 text-white font-bold'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
@@ -199,7 +202,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
               onClick={() => loadPreset('bubbles-cafe')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 formData.organisationName === 'Bubbles Café'
-                  ? 'bg-emerald-600 text-white font-bold'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
@@ -209,7 +212,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
               onClick={() => loadPreset('city-clinic')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 formData.organisationName === 'City Health Clinic'
-                  ? 'bg-emerald-600 text-white font-bold'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
@@ -219,7 +222,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
               onClick={() => loadPreset('apex-advisory')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 formData.organisationName === 'Apex Advisory Partners'
-                  ? 'bg-emerald-600 text-white font-bold'
+                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
@@ -229,26 +232,26 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
               onClick={() => loadPreset('blank')}
               className={`px-2 py-1 rounded-lg font-medium transition-colors ${
                 formData.organisationName === ''
-                  ? 'bg-amber-600 text-white font-bold'
+                  ? 'bg-amber-600 text-white font-bold shadow-xs'
                   : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
               }`}
-              title="Clear all fields for fresh input testing"
+              title="Clear all fields for blank onboarding flow"
             >
-              Clear Form
+              Blank Form
             </button>
           </div>
         </div>
 
         {/* Quick step navigation bar */}
         <div className="flex items-center justify-between pt-2 text-[10px] text-slate-400 overflow-x-auto gap-1">
-          <span className="font-semibold text-slate-300 shrink-0 mr-1">Jump to Step:</span>
+          <span className="font-semibold text-slate-300 shrink-0 mr-1">Reviewer Jump:</span>
           {[
             { num: 1, label: '1. Welcome' },
             { num: 2, label: '2. Business' },
             { num: 3, label: '3. What you do' },
             { num: 4, label: '4. Service model' },
             { num: 5, label: '5. Location' },
-            { num: 6, label: '6. Fedoo setup' },
+            { num: 6, label: '6. Fedoo contact' },
             { num: 7, label: '7. Review' },
             { num: 8, label: 'Ready' },
           ].map((s) => (
@@ -549,11 +552,37 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   </select>
                 </div>
 
+                {/* Plain-language description when 'Another service business' is selected */}
+                {formData.sector === 'Another service business' && (
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5 animate-in fade-in duration-150">
+                    <label className="font-bold text-slate-900 block text-xs">
+                      Describe what your business does (in your own words)
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="e.g. We provide specialty equipment rental, on-site technician support, and sound staging for private events."
+                      value={formData.customSectorDescription || ''}
+                      onChange={(e) => setFormData({ ...formData, customSectorDescription: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:ring-2 focus:ring-emerald-600 focus:border-transparent placeholder:text-slate-400"
+                    />
+                    <p className="text-[11px] text-slate-500 leading-normal">
+                      Fedoo uses your description to guide relevant feedback questions and recommendations for your service flow.
+                    </p>
+                  </div>
+                )}
+
                 {/* Business Category (adapts by sector) */}
                 <div>
-                  <label className="font-bold text-slate-900 block mb-1.5 text-xs">
-                    Business category for <span className="text-emerald-800 font-semibold">{formData.sector}</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="font-bold text-slate-900 text-xs">
+                      Business category for <span className="text-emerald-800 font-semibold">{formData.sector}</span> <span className="text-rose-500">*</span>
+                    </label>
+                    {!formData.category && (
+                      <span className="text-[11px] text-amber-600 font-medium">
+                        Please choose a category
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {currentSectorConfig.categories.map((cat) => {
                       const isSelected = formData.category === cat;
@@ -582,10 +611,10 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="font-bold text-slate-900 text-xs">
-                      What services do you provide?
+                      What services do you provide? <span className="text-rose-500">*</span>
                     </label>
                     <span className="text-slate-500 text-[11px]">
-                      Select all that apply
+                      {formData.services.length === 0 ? 'Select at least one' : `${formData.services.length} selected`}
                     </span>
                   </div>
 
@@ -687,7 +716,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   <span>Back</span>
                 </button>
                 <button
-                  disabled={formData.services.length === 0}
+                  disabled={!formData.category || formData.services.length === 0}
                   onClick={() => setCurrentStep(4)}
                   className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-xs transition-all active:scale-98"
                 >
@@ -711,7 +740,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   How do customers usually receive your service?
                 </h2>
                 <p className="text-slate-600 text-sm mt-1 leading-relaxed">
-                  Choose everything that applies. Fedoo uses this to understand which parts of the customer experience are relevant.
+                  Choose everything that applies. Fedoo is learning how your customers experience your service so future recommendations fit how you operate.
                 </p>
               </div>
 
@@ -750,12 +779,17 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                 })}
               </div>
 
-              {/* Contextual follow-up questions tailored to sector */}
+              {/* Lightweight contextual follow-up questions */}
               {currentSectorConfig.contextQuestions.length > 0 && (
                 <div className="pt-4 border-t border-slate-200/70 space-y-4">
-                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Sector Experience Details ({formData.sector})</span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>A little more context on how you serve customers</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Optional context to help Fedoo suggest relevant feedback questions later.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -831,7 +865,15 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   Where do you serve customers first?
                 </h2>
                 <p className="text-slate-600 text-sm mt-1 leading-relaxed">
-                  A Location is a branch, shop, office or other place where customers receive your service. You can add more later.
+                  An Organisation can have one Location or many. A Location is where service happens (such as a salon, clinic, office, branch, studio, or restaurant).
+                </p>
+              </div>
+
+              {/* Informative distinction card */}
+              <div className="p-3.5 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <p className="text-xs text-emerald-950 leading-relaxed">
+                  Onboarding sets up your <strong>first Location</strong> now so Fedoo has somewhere to attach Feedback Points later. Additional Locations can easily be added anytime from your dashboard.
                 </p>
               </div>
 
@@ -848,9 +890,28 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                     onChange={(e) => setFormData({ ...formData, firstLocationName: e.target.value })}
                     className="w-full min-h-[44px] px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
                   />
-                  <span className="text-[11px] text-slate-500 mt-1 block">
-                    What customers or team members call this physical branch or service location.
-                  </span>
+                  
+                  {/* Quick suggestion chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                    <span className="text-[11px] text-slate-400">Suggestions:</span>
+                    {[
+                      currentSectorConfig.defaultLocationPlaceholder,
+                      'Flagship',
+                      'Downtown',
+                      formData.city ? `${formData.city} Branch` : 'Main Office',
+                    ]
+                      .filter((s, idx, arr) => s && arr.indexOf(s) === idx)
+                      .map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, firstLocationName: suggestion })}
+                          className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200/80 transition-colors"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                  </div>
                 </div>
 
                 {/* City and Address */}
@@ -888,7 +949,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                 {/* Multi-location question */}
                 <div className="pt-2">
                   <label className="font-bold text-slate-900 block mb-2 text-xs">
-                    Does your business have more than one Location?
+                    Does your business operate in more than one Location?
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
@@ -901,8 +962,8 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                       }`}
                     >
                       <div>
-                        <div className="text-xs">No, just this one</div>
-                        <div className="text-[11px] text-slate-500 font-normal">Single physical premises or unit</div>
+                        <div className="text-xs">Single location</div>
+                        <div className="text-[11px] text-slate-500 font-normal">This is our only service premises</div>
                       </div>
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.hasMoreLocations === 'no' ? 'border-emerald-700 bg-emerald-700' : 'border-slate-300'}`}>
                         {formData.hasMoreLocations === 'no' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -919,8 +980,8 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                       }`}
                     >
                       <div>
-                        <div className="text-xs">Yes, I’ll add the others later</div>
-                        <div className="text-[11px] text-slate-500 font-normal">Branches, kiosks, or regional hubs</div>
+                        <div className="text-xs">Multiple locations planned</div>
+                        <div className="text-[11px] text-slate-500 font-normal">We’ll add other branches later from Settings</div>
                       </div>
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.hasMoreLocations === 'yes' ? 'border-emerald-700 bg-emerald-700' : 'border-slate-300'}`}>
                         {formData.hasMoreLocations === 'yes' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -977,6 +1038,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                                 ...formData,
                                 timezone: tz.offset,
                                 timezoneLabel: tz.label,
+                                timezoneId: tz.tzId,
                               });
                               setShowTzPicker(false);
                             }}
@@ -1018,7 +1080,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
           )}
 
           {/* ================================================================ */}
-          {/* STEP 6 — YOUR FEDOO SETUP                                        */}
+          {/* STEP 6 — YOUR FEDOO CONTACT                                      */}
           {/* ================================================================ */}
           {currentStep === 6 && (
             <div className="space-y-6 animate-in fade-in duration-200">
@@ -1027,10 +1089,10 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   Step 6 of 7
                 </span>
                 <h2 className="text-2xl font-bold text-slate-950 mt-1">
-                  Who will manage Fedoo?
+                  Your Fedoo contact
                 </h2>
                 <p className="text-slate-600 text-sm mt-1 leading-relaxed">
-                  This is the Organisation’s administrative contact, not customer data.
+                  We’ll use these details for account and operational communication.
                 </p>
               </div>
 
@@ -1130,7 +1192,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                     Which languages do your customers commonly use?
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {['English', 'French', 'Other / later'].map((lang) => {
+                    {['English', 'French', 'Kirundi', 'Swahili', 'Other / later'].map((lang) => {
                       const isSelected = formData.feedbackLanguages.includes(lang);
                       return (
                         <button
@@ -1187,10 +1249,10 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   Step 7 of 7
                 </span>
                 <h2 className="text-2xl font-bold text-slate-950 mt-1">
-                  Does this look right?
+                  Here is what Fedoo understands about your business
                 </h2>
                 <p className="text-slate-600 text-sm mt-1 leading-relaxed">
-                  Review your business details. You can edit any section before finalizing.
+                  Review your business details. You can edit any section before finishing setup.
                 </p>
               </div>
 
@@ -1207,6 +1269,11 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                     <div className="text-slate-600 text-[11px] font-medium">
                       {formData.sector} → <span className="text-slate-900 font-semibold">{formData.category}</span>
                     </div>
+                    {formData.customSectorDescription && (
+                      <p className="text-[11px] text-slate-600 italic bg-white p-2 rounded-lg border border-slate-200/80 mt-1 max-w-lg">
+                        "{formData.customSectorDescription}"
+                      </p>
+                    )}
                     <div className="text-slate-500 text-[11px]">
                       {formData.city}, {formData.country}
                       {formData.websiteOrSocial && ` • ${formData.websiteOrSocial}`}
@@ -1298,18 +1365,18 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   </button>
                 </div>
 
-                {/* Section 5: Fedoo Setup */}
+                {/* Section 5: Fedoo Contact */}
                 <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">
-                      Fedoo Setup & Administration
+                      Primary Fedoo Contact
                     </span>
                     <div className="text-slate-900 font-semibold text-xs">
                       {formData.adminName} ({formData.adminEmail})
                     </div>
                     <div className="text-slate-600 text-[11px]">
-                      Admin Language: {formData.adminLanguage === 'en' ? 'English' : 'Français'}
-                      {' • '}Customer Feedback: {formData.feedbackLanguages.join(' + ')}
+                      Interface Language: {formData.adminLanguage === 'en' ? 'English' : 'Français'}
+                      {' • '}Customer Languages: {formData.feedbackLanguages.join(', ')}
                     </div>
                     {formData.adminPhone && (
                       <div className="text-slate-500 text-[11px]">
@@ -1361,7 +1428,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                   {formData.organisationName || 'Your business'} is ready in Fedoo
                 </h2>
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto leading-relaxed">
-                  We now understand your business, services and first Location. Next, set up where customers will give feedback.
+                  We now understand your business and first Location. Next, set up where customers will give feedback.
                 </p>
               </div>
 
@@ -1372,7 +1439,7 @@ export const FirstRunSetup: React.FC<FirstRunSetupProps> = ({
                     {formData.organisationName}
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                    Organisation Created
+                    Organisation Ready
                   </span>
                 </div>
 

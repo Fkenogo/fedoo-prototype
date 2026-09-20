@@ -422,6 +422,10 @@ export default function App() {
               // Apply newly onboarded organisation & location to prototype state
               setOrganisation(newOrg);
               setLocations([newLocation]);
+              setEndpoints([]);
+              setSignals({});
+              setSessions([]);
+              setNeedsReviewItems([]);
               setTeamMembers([newAdmin]);
               setCurrentScope(newLocationId);
               setPrimaryLanguage(onboardingData.adminLanguage);
