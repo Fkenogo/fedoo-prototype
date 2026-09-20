@@ -222,6 +222,149 @@ export const GOVERNED_MEASURES: Measure[] = [
     version: '1.0',
     rationale: 'Not applicable to in-store physical dining endpoints.',
   },
+  // -------------------------------------------------------------------------
+  // [PROTOTYPE CONTENT ONLY — Product Truth will supersede]
+  // Additional areas used to demonstrate the First Feedback Point
+  // recommendation experience for personal-care and healthcare contexts.
+  // These are NOT canonical Fedoo Measures; wording and set membership are
+  // placeholders pending the governed instrument/recommendation library.
+  // -------------------------------------------------------------------------
+  {
+    id: 'treatment_service_result',
+    name: 'Treatment / Service Result',
+    shortDescription: 'How customers feel about the result they received.',
+    contextNotes: 'Demonstration area for personal-care and treatment contexts.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How happy are you with the result of your treatment or service today?',
+    standardQuestionFr: 'Êtes-vous satisfait du résultat de votre traitement ou service aujourd’hui ?',
+    scaleFamily: 'satisfaction',
+    category: 'Service Delivery',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'practitioner_skill',
+    name: 'Practitioner Skill',
+    shortDescription: 'Customer perception of the person delivering the service.',
+    contextNotes: 'Demonstration area for personal-care and treatment contexts.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How would you rate the skill of the person who served you today?',
+    standardQuestionFr: 'Comment évalueriez-vous les compétences de la personne qui vous a servi aujourd’hui ?',
+    scaleFamily: 'quality',
+    category: 'People & Courtesy',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'treatment_comfort',
+    name: 'Treatment Comfort',
+    shortDescription: 'Comfort experienced during the treatment or service.',
+    contextNotes: 'Demonstration area for personal-care contexts.',
+    isCore: false,
+    isRecommended: false,
+    availability: 'available',
+    standardQuestion: 'How comfortable did you feel during your treatment today?',
+    standardQuestionFr: 'Vous êtes-vous senti à l’aise pendant votre traitement aujourd’hui ?',
+    scaleFamily: 'satisfaction',
+    category: 'Environment & Space',
+    typicalBurden: 'standard',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'wait_experience',
+    name: 'Wait Experience',
+    shortDescription: 'How customers experienced waiting before being served.',
+    contextNotes: 'Demonstration area spanning walk-in and appointment contexts.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How satisfied were you with the time you waited today?',
+    standardQuestionFr: 'Dans quelle mesure avez-vous été satisfait du temps d’attente aujourd’hui ?',
+    scaleFamily: 'satisfaction',
+    category: 'Service Delivery',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'appointment_access',
+    name: 'Appointment Access',
+    shortDescription: 'Ease of booking and being seen for an appointment.',
+    contextNotes: 'Demonstration area for appointment-based services.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How easy was it to book and be seen for your appointment?',
+    standardQuestionFr: 'Avez-vous trouvé facile de prendre et d’obtenir votre rendez-vous ?',
+    scaleFamily: 'satisfaction',
+    category: 'Service Delivery',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'clinical_explanation_clarity',
+    name: 'Clinical Explanation Clarity',
+    shortDescription: 'Whether advice and next steps were explained clearly.',
+    contextNotes: 'Demonstration area for healthcare consultations.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How clearly did the clinician explain your care or next steps today?',
+    standardQuestionFr: 'Les explications sur vos soins ou les prochaines étapes étaient-elles claires aujourd’hui ?',
+    scaleFamily: 'quality',
+    category: 'Service Delivery',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'clinician_empathy',
+    name: 'Clinician Empathy',
+    shortDescription: 'How understood and cared for the customer felt.',
+    contextNotes: 'Demonstration area for healthcare consultations.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How well did the clinician listen to and understand your concerns today?',
+    standardQuestionFr: 'Le clinicien a-t-il bien écouté et compris vos préoccupations aujourd’hui ?',
+    scaleFamily: 'satisfaction',
+    category: 'People & Courtesy',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
+  {
+    id: 'privacy',
+    name: 'Privacy',
+    shortDescription: 'Customer confidence that personal information was handled respectfully.',
+    contextNotes: 'Demonstration area for personal and health information contexts.',
+    isCore: false,
+    isRecommended: true,
+    availability: 'available',
+    standardQuestion: 'How confident did you feel that your privacy was respected today?',
+    standardQuestionFr: 'Dans quelle mesure avez-vous eu confiance que votre vie privée était respectée aujourd’hui ?',
+    scaleFamily: 'satisfaction',
+    category: 'Contextual',
+    typicalBurden: 'quick',
+    comparableAcrossLocations: true,
+    version: '0.9 Prototype',
+    rationale: 'Prototype demonstration only — governed Measure set pending.',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1272,6 +1415,106 @@ export const SINGLE_LOCATION_SIGNALS: Record<string, ServiceSignal> = {
     ],
   },
 };
+
+// ---------------------------------------------------------------------------
+// SCENARIO 4: SINGLE-LOCATION BEAUTY SALON (Vera Beauty) — ZERO FEEDBACK POINTS
+// ---------------------------------------------------------------------------
+// Pass 2 founder-review scenario. The Organisation arrives with onboarding
+// context only (sector, one Location, language) and no Feedback Points yet.
+export const VERA_BEAUTY_ORGANISATION: Organisation = {
+  id: 'org-vera',
+  name: 'Vera Beauty',
+  businessType: 'Beauty & Personal Care (Salon)',
+  operatingCountry: 'Burundi',
+  primaryLanguage: 'en',
+  locations: [
+    {
+      id: 'loc-vera-main',
+      name: 'Main Salon',
+      type: 'physical',
+      addressOrDetail: 'Bujumbura',
+      managerName: 'Vera Niyonkuru',
+      totalResponses: 0,
+      lastFeedbackAt: null,
+      endpointsCount: 0,
+      activeMeasuresCount: 0,
+      status: 'inactive',
+    },
+  ],
+};
+
+export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [];
+export const VERA_BEAUTY_SESSIONS: FeedbackSession[] = [];
+export const VERA_BEAUTY_NEEDS_REVIEW: NeedsReviewItem[] = [];
+
+// ---------------------------------------------------------------------------
+// SCENARIO 5: SINGLE-LOCATION CLINIC (City Clinic) — ZERO FEEDBACK POINTS
+// ---------------------------------------------------------------------------
+export const CITY_CLINIC_ORGANISATION: Organisation = {
+  id: 'org-city-clinic',
+  name: 'City Clinic',
+  businessType: 'Healthcare & Clinic',
+  operatingCountry: 'Burundi',
+  primaryLanguage: 'en',
+  locations: [
+    {
+      id: 'loc-clinic-main',
+      name: 'City Clinic — Main',
+      type: 'physical',
+      addressOrDetail: 'Bujumbura',
+      managerName: 'Dr. Alain Bizimana',
+      totalResponses: 0,
+      lastFeedbackAt: null,
+      endpointsCount: 0,
+      activeMeasuresCount: 0,
+      status: 'inactive',
+    },
+  ],
+};
+
+export const CITY_CLINIC_ENDPOINTS: Endpoint[] = [];
+export const CITY_CLINIC_SESSIONS: FeedbackSession[] = [];
+export const CITY_CLINIC_NEEDS_REVIEW: NeedsReviewItem[] = [];
+
+// Builds a zero-evidence signal map for a location (prototype simulation).
+// Production: N=0 → NO_EVIDENCE, never 0%.
+export function buildEmptySignals(locationId: string): Record<string, ServiceSignal> {
+  const emptySignal = (measureId: string, loc: string): ServiceSignal => ({
+    measureId,
+    locationId: loc,
+    scoreLabel: 'No responses yet',
+    favourablePercentage: undefined,
+    responseCount: 0,
+    evidenceLevel: 'none',
+    movement: { direction: 'unavailable' },
+    distribution: [],
+  });
+
+  const measureIds = [
+    'overall_experience',
+    'speed_of_service',
+    'staff_courtesy',
+    'food_beverage_quality',
+    'likelihood_to_return',
+    'treatment_service_result',
+    'practitioner_skill',
+    'wait_experience',
+    'appointment_access',
+    'clinical_explanation_clarity',
+    'clinician_empathy',
+    'privacy',
+  ];
+
+  const signals: Record<string, ServiceSignal> = {};
+  measureIds.forEach((id) => {
+    signals[`${id}_all`] = emptySignal(id, 'all');
+    signals[`${id}_${locationId}`] = emptySignal(id, locationId);
+  });
+  return signals;
+}
+
+export const VERA_BEAUTY_SIGNALS: Record<string, ServiceSignal> = buildEmptySignals('loc-vera-main');
+export const CITY_CLINIC_SIGNALS: Record<string, ServiceSignal> = buildEmptySignals('loc-clinic-main');
 
 export const SINGLE_LOCATION_SESSIONS: FeedbackSession[] = [
   {

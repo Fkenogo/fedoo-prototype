@@ -33,6 +33,9 @@ interface ParticipantFeedbackViewProps {
   onExit?: () => void;
   onClose?: () => void;
   viewMode?: 'standalone' | 'phone';
+  // Organisation-side preview: shows a non-customer-facing banner and never
+  // persists a response. Does not change the participant journey itself.
+  previewMode?: boolean;
 }
 
 export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = ({
@@ -48,6 +51,7 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
   onExit,
   onClose,
   viewMode = 'phone',
+  previewMode = false,
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, { value: string; scoreIndex: number }>>({});
@@ -119,7 +123,9 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
       answers: formattedAnswers,
     };
 
-    handleSubmitSession(newSession);
+    if (!previewMode) {
+      handleSubmitSession(newSession);
+    }
     setIsSubmitted(true);
   };
 
@@ -162,7 +168,9 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
               Thank You for Your Feedback
             </h2>
             <p className="text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
-              Your ratings and thoughts go directly to our service team at {resolvedLocName}.
+              {previewMode
+                ? `This is a preview of the customer experience for ${resolvedLocName}. No response was recorded.`
+                : `Your ratings and thoughts go directly to our service team at ${resolvedLocName}.`}
             </p>
           </div>
 
@@ -311,6 +319,13 @@ export const ParticipantFeedbackView: React.FC<ParticipantFeedbackViewProps> = (
   // Shell Layout
   const innerApp = (
     <div className="bg-white min-h-[580px] flex flex-col justify-between rounded-3xl border border-slate-200 shadow-xl overflow-hidden max-w-lg w-full mx-auto">
+      {/* Preview-only banner (organisation testing its own Feedback Point) */}
+      {previewMode && (
+        <div className="bg-amber-500 text-amber-950 text-center text-[10px] font-bold py-1.5 px-4">
+          Preview mode — this response will not be recorded
+        </div>
+      )}
+
       {/* Participant Header */}
       <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
         <div className="flex items-center gap-2.5">

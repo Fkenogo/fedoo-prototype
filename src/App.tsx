@@ -15,7 +15,7 @@ import { SettingsView } from './components/SettingsView';
 import { ParticipantFeedbackView } from './components/ParticipantFeedbackView';
 import { FirstRunSetup } from './components/FirstRunSetup';
 import { OperatorView } from './components/OperatorView';
-import { CreateEndpointModal } from './components/CreateEndpointModal';
+import { FirstFeedbackPointWizard } from './components/FirstFeedbackPointWizard';
 import { PrintFlyerModal } from './components/PrintFlyerModal';
 
 import { 
@@ -50,6 +50,16 @@ import {
   EMPTY_SIGNALS,
   EMPTY_FEEDBACK_SESSIONS,
   EMPTY_NEEDS_REVIEW,
+  VERA_BEAUTY_ORGANISATION,
+  VERA_BEAUTY_ENDPOINTS,
+  VERA_BEAUTY_SIGNALS,
+  VERA_BEAUTY_SESSIONS,
+  VERA_BEAUTY_NEEDS_REVIEW,
+  CITY_CLINIC_ORGANISATION,
+  CITY_CLINIC_ENDPOINTS,
+  CITY_CLINIC_SIGNALS,
+  CITY_CLINIC_SESSIONS,
+  CITY_CLINIC_NEEDS_REVIEW,
 } from './data/mockData';
 
 import { recalculateSignalWithSession } from './utils/feedbackUtils';
@@ -96,7 +106,6 @@ export default function App() {
   const [customerEndpointId, setCustomerEndpointId] = useState<string | null>(null);
 
   // Modals
-  const [isCreateEndpointModalOpen, setIsCreateEndpointModalOpen] = useState(false);
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
 
   // REFERENCE ONLY (prototype review tooling): toggles the future-state
@@ -119,6 +128,8 @@ export default function App() {
     setSelectedMeasureId(null);
     setSelectedLocationId(null);
     setIsChangingWhatWeTrack(false);
+    // Leave any in-progress guided flow so the new scenario's context is used.
+    setCurrentRoute('app');
 
     if (scenario === 'multi-location') {
       setOrganisation(MULTI_LOCATION_ORGANISATION);
@@ -138,6 +149,24 @@ export default function App() {
       setNeedsReviewItems([]);
       setCurrentScope(SINGLE_LOCATION_ORGANISATION.locations[0].id);
       showToast('Loaded Single-Location Scenario: The Corner Bistro');
+    } else if (scenario === 'vera-beauty') {
+      setOrganisation(VERA_BEAUTY_ORGANISATION);
+      setLocations(VERA_BEAUTY_ORGANISATION.locations);
+      setEndpoints(VERA_BEAUTY_ENDPOINTS);
+      setSignals(VERA_BEAUTY_SIGNALS);
+      setSessions(VERA_BEAUTY_SESSIONS);
+      setNeedsReviewItems(VERA_BEAUTY_NEEDS_REVIEW);
+      setCurrentScope(VERA_BEAUTY_ORGANISATION.locations[0].id);
+      showToast('Loaded Beauty Scenario: Vera Beauty (First Feedback Point)');
+    } else if (scenario === 'city-clinic') {
+      setOrganisation(CITY_CLINIC_ORGANISATION);
+      setLocations(CITY_CLINIC_ORGANISATION.locations);
+      setEndpoints(CITY_CLINIC_ENDPOINTS);
+      setSignals(CITY_CLINIC_SIGNALS);
+      setSessions(CITY_CLINIC_SESSIONS);
+      setNeedsReviewItems(CITY_CLINIC_NEEDS_REVIEW);
+      setCurrentScope(CITY_CLINIC_ORGANISATION.locations[0].id);
+      showToast('Loaded Healthcare Scenario: City Clinic (First Feedback Point)');
     } else {
       setOrganisation(EMPTY_ORGANISATION);
       setLocations(EMPTY_ORGANISATION.locations);
@@ -148,6 +177,16 @@ export default function App() {
       setCurrentScope(EMPTY_ORGANISATION.locations[0].id);
       showToast('Loaded New Organisation Scenario: Zero Data / Fresh Setup');
     }
+  };
+
+  // Opens the Pass 2 guided First Feedback Point flow.
+  const openFeedbackPointWizard = () => {
+    setSelectedEndpointId(null);
+    setSelectedMeasureId(null);
+    setSelectedLocationId(null);
+    setIsChangingWhatWeTrack(false);
+    setCurrentRoute('feedback-point-setup');
+    window.scrollTo({ top: 0 });
   };
 
   const handleResetData = () => {
@@ -267,12 +306,11 @@ export default function App() {
     setLocations((prev) =>
       prev.map((loc) =>
         loc.id === newEp.locationId
-          ? { ...loc, endpointsCount: loc.endpointsCount + 1 }
+          ? { ...loc, endpointsCount: loc.endpointsCount + 1, status: 'active' }
           : loc
       )
     );
-    setIsCreateEndpointModalOpen(false);
-    showToast(`Created new feedback point "${newEp.humanName}"`);
+    showToast(`"${newEp.humanName}" is live — customers can now share feedback.`);
   };
 
   // Participant Feedback Submission
@@ -431,15 +469,34 @@ export default function App() {
               setPrimaryLanguage(onboardingData.adminLanguage);
 
               if (destination === 'feedback_point') {
-                setCurrentRoute('app');
-                setActiveTab('feedback-points');
-                setIsCreateEndpointModalOpen(true);
+                // Pass 2: go straight into the guided First Feedback Point flow.
+                openFeedbackPointWizard();
                 showToast(`${onboardingData.organisationName} created! Let's set up your first feedback point.`);
               } else {
                 setCurrentRoute('app');
                 setActiveTab('overview');
                 showToast(`${onboardingData.organisationName} is ready in Fedoo.`);
               }
+            }}
+          />
+        </main>
+      ) : currentRoute === 'feedback-point-setup' ? (
+        <main className="flex-1 w-full">
+          <FirstFeedbackPointWizard
+            organisation={organisation}
+            locations={locations}
+            measures={measures}
+            defaultLocationId={currentScope === 'all' ? locations[0]?.id || '' : currentScope}
+            onCancel={() => setCurrentRoute('app')}
+            onActivate={handleCreateEndpoint}
+            onGoToFeedbackPoints={() => {
+              setCurrentRoute('app');
+              handleTabChange('feedback-points');
+            }}
+            onAddAnotherLocation={() => {
+              setCurrentRoute('app');
+              handleTabChange('locations');
+              showToast('Locations management is unchanged in this pass — add more Locations here.');
             }}
           />
         </main>
@@ -564,6 +621,7 @@ export default function App() {
                 onNavigateTab={(tab) => handleTabChange(tab)}
                 onSelectEndpoint={(id) => setSelectedEndpointId(id)}
                 onStartSetup={() => setCurrentRoute('setup')}
+                onCreateFeedbackPoint={openFeedbackPointWizard}
                 showAttentionReference={showAttentionReference}
               />
             ) : activeTab === 'feedback-points' ? (
@@ -575,7 +633,7 @@ export default function App() {
                 locations={locations}
                 measures={measures}
                 onSelectEndpoint={(id) => setSelectedEndpointId(id)}
-                onCreateEndpointClick={() => setIsCreateEndpointModalOpen(true)}
+                onCreateEndpointClick={openFeedbackPointWizard}
                 onOpenCustomerViewForEndpoint={(epId) => {
                   setCustomerEndpointId(epId);
                   setCurrentRoute('feedback');
@@ -626,17 +684,6 @@ export default function App() {
       )}
 
       {/* 4. MODALS */}
-      {/* Create Feedback Point Modal */}
-      {isCreateEndpointModalOpen && (
-        <CreateEndpointModal
-          locations={locations}
-          measures={measures}
-          defaultLocationId={currentScope === 'all' ? locations[0]?.id : currentScope}
-          onClose={() => setIsCreateEndpointModalOpen(false)}
-          onCreateEndpoint={handleCreateEndpoint}
-        />
-      )}
-
       {/* Printable Flyer Preview Modal */}
       {printFlyerEndpoint && (
         <PrintFlyerModal
