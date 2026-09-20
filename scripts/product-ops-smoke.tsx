@@ -62,9 +62,24 @@ check('shell has section navigation', ['Measure Library', 'Instruments', 'Langua
 
 const overview = render(<OpsOverview {...props} />);
 check('overview heading', overview.includes('Operations overview'));
-check('overview shows catalogue counts', overview.includes('Measures') && overview.includes('instrument-ready'));
 check('overview shows language status', overview.includes('English operational') && overview.includes('French in progress'));
 check('overview has Open workspace CTA', overview.includes('Open workspace'));
+
+// Overview readiness labels must not collapse Operational into "instrument-ready".
+check('overview does not use instrument-ready label', !overview.includes('instrument-ready'));
+check('overview shows separate Operational and Defined counts', overview.includes('Operational') && overview.includes('Defined'));
+check('overview separates Instruments from Measures', overview.includes('Instruments') && overview.includes('Measures without an Instrument'));
+
+// Canonical catalogue vs loaded prototype subset.
+check('overview distinguishes canonical catalogue', overview.includes('Canonical catalogue') && overview.includes('84 Measures'));
+check('overview states loaded prototype subset', overview.includes('Loaded in this prototype workspace') && overview.includes(`${model.measures.length}`));
+
+// Language coverage derives from Instruments, not Measure existence.
+const operationalEnglishInstruments = model.instruments.filter((i) => i.english === 'Operational').length;
+const measuresClaimingEnglishOperational = model.measures.filter((m) => m.english === 'Operational').length;
+check('English approved-Instrument count equals operational English Instruments', operationalEnglishInstruments === 5 && measuresClaimingEnglishOperational === operationalEnglishInstruments);
+const noInstrumentMeasure = model.measures.find((m) => !m.instrumentId);
+check('Measure without an Instrument is not English Operational', Boolean(noInstrumentMeasure) && noInstrumentMeasure!.english === 'Not available');
 
 // 2. Measure Library.
 const library = render(<MeasureLibrary {...props} />);
@@ -74,6 +89,17 @@ check('measure library shows readiness', library.includes('Operational readiness
 check('measure library shows applicability', library.includes('Applicability'));
 check('measure library shows language coverage', library.includes('Language coverage'));
 check('measure library shows recommendation usage', library.includes('Recommendation usage'));
+check('measure library distinguishes canonical vs loaded subset', library.includes('Canonical catalogue') && library.includes('loaded prototype fixtures'));
+
+// A Measure with no Instrument must show "Not yet available", never Operational.
+const noInstrument = model.measures.find((m) => !m.instrumentId)!;
+const libModel = {
+  ...model,
+  measures: [noInstrument, ...model.measures.filter((m) => m.id !== noInstrument.id)],
+};
+const libraryNoInstrument = render(<MeasureLibrary {...props} model={libModel} />);
+check('measure without Instrument shows English Instrument Not yet available', libraryNoInstrument.includes('English Instrument') && libraryNoInstrument.includes('Not yet available'));
+check('measure without Instrument does not imply Operational English', !/English Instrument:[\s\S]{0,40}Operational/.test(libraryNoInstrument));
 
 // 3. Instruments workspace + detail.
 const instruments = render(<InstrumentsWorkspace {...props} />);

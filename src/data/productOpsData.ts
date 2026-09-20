@@ -47,12 +47,18 @@ export interface OpsMeasure {
   readiness: Readiness;
   instrumentId?: string;
   sectors: string[];
-  english: 'Operational' | 'Draft';
-  french: 'Operational' | 'Candidate' | 'Missing';
+  // Language coverage derives from the Instrument, not the Measure itself.
+  // 'Not available' means no Instrument exists for this Measure yet.
+  english: 'Operational' | 'Draft' | 'Missing' | 'Not available';
+  french: 'Operational' | 'Candidate' | 'Missing' | 'Not available';
   recommendedFor: string[];
   usedInTemplates: string[];
   version: string;
 }
+
+// Canonical Fedoo catalogue size (Product Truth authority). This prototype
+// loads a bounded fixture subset; the two must not be conflated in the UI.
+export const CANONICAL_MEASURE_COUNT = 84;
 
 export interface OpsRecommendationMap {
   id: string;
@@ -267,8 +273,10 @@ export function buildProductOpsModel(measures: Measure[]): ProductOpsModel {
       readiness,
       instrumentId: instrument?.id,
       sectors: SECTOR_MAP[m.id] || ['Universal'],
-      english: 'Operational',
-      french: m.standardQuestionFr ? 'Candidate' : 'Missing',
+      // Coverage follows the Instrument. Without an Instrument, no language is
+      // operational — the Measure may exist but is not yet instrument-ready.
+      english: instrument ? instrument.english : 'Not available',
+      french: instrument ? instrument.french : 'Not available',
       recommendedFor: SECTOR_MAP[m.id] || [],
       usedInTemplates: TEMPLATE_USAGE[m.id] || [],
       version: m.version,

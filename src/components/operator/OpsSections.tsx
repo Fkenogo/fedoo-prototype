@@ -23,6 +23,7 @@ import {
   LifecycleState,
   Readiness,
 } from './opsTypes';
+import { CANONICAL_MEASURE_COUNT } from '../../data/productOpsData';
 
 export type { OpsSection } from './opsTypes';
 
@@ -70,7 +71,9 @@ const Badge: React.FC<{ className: string; children: React.ReactNode }> = ({
 export const OpsOverview: React.FC<OpsSectionProps> = ({ model, onNavigate }) => {
   const total = model.measures.length;
   const operational = model.measures.filter((m) => m.readiness === 'Operational').length;
-  const needInstruments = model.measures.filter((m) => m.readiness === 'Defined').length;
+  const defined = model.measures.filter((m) => m.readiness === 'Defined').length;
+  const incomplete = model.measures.filter((m) => m.readiness === 'Incomplete').length;
+  const withoutInstrument = model.measures.filter((m) => !m.instrumentId).length;
   const drafts = model.drafts.filter((d) => d.state !== 'Published').length;
   const openDiagnostics = model.diagnostics.filter((d) => !d.resolved).length;
 
@@ -79,15 +82,17 @@ export const OpsOverview: React.FC<OpsSectionProps> = ({ model, onNavigate }) =>
       section: 'measure-library' as OpsSection,
       icon: BookOpen,
       title: 'Measure Library',
-      primary: `${total} Measures`,
-      secondary: `${operational} instrument-ready`,
+      primary: `${total} Measures loaded`,
+      secondary: `${operational} Operational · ${defined} Defined${
+        incomplete > 0 ? ` · ${incomplete} Incomplete` : ''
+      }`,
     },
     {
       section: 'instruments' as OpsSection,
       icon: FlaskConical,
       title: 'Instruments',
-      primary: `${model.instruments.length} instruments`,
-      secondary: `${needInstruments} Measures still need Instruments`,
+      primary: `${model.instruments.length} Instruments`,
+      secondary: `${withoutInstrument} Measures without an Instrument`,
     },
     {
       section: 'languages' as OpsSection,
@@ -126,6 +131,15 @@ export const OpsOverview: React.FC<OpsSectionProps> = ({ model, onNavigate }) =>
         <p className="text-xs text-slate-500 mt-1">
           An operational snapshot of the governed catalogue. Factual states only.
         </p>
+        <div className="mt-3 inline-flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 bg-white border border-slate-200 rounded-xl px-3 py-2">
+          <span>
+            Canonical catalogue: <strong className="font-semibold text-slate-700">{CANONICAL_MEASURE_COUNT} Measures</strong>
+          </span>
+          <span className="text-slate-300">·</span>
+          <span>
+            Loaded in this prototype workspace: <strong className="font-semibold text-slate-700">{total}</strong>
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -188,6 +202,10 @@ export const MeasureLibrary: React.FC<OpsSectionProps> = ({ model }) => {
         <h2 className="text-lg font-bold text-slate-900">Measure Library</h2>
         <p className="text-xs text-slate-500 mt-1">
           The internal operational catalogue. Not Organisation-facing language.
+        </p>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Showing {model.measures.length} loaded prototype fixtures · Canonical catalogue:{' '}
+          {CANONICAL_MEASURE_COUNT} Measures
         </p>
       </div>
 
@@ -280,12 +298,29 @@ export const MeasureLibrary: React.FC<OpsSectionProps> = ({ model }) => {
               </Section>
 
               <Section title="Language coverage">
-                <div className="text-xs text-slate-600">
-                  English: <strong className="font-semibold">{selected.english}</strong> · French:{' '}
-                  <strong className="font-semibold">{selected.french}</strong>
+                <div className="text-xs text-slate-600 space-y-0.5">
+                  <div>
+                    Measure defined:{' '}
+                    <strong className="font-semibold">
+                      {selected.lifecycle === 'Retired' ? 'Retired' : 'Yes'}
+                    </strong>
+                  </div>
+                  <div>
+                    English Instrument:{' '}
+                    <strong className="font-semibold">
+                      {instrument ? instrument.english : 'Not yet available'}
+                    </strong>
+                  </div>
+                  <div>
+                    French Instrument:{' '}
+                    <strong className="font-semibold">
+                      {instrument ? instrument.french : 'Not yet available'}
+                    </strong>
+                  </div>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  French wording does not by itself establish measurement equivalence.
+                  Coverage follows the Instrument. French wording does not by itself establish
+                  measurement equivalence.
                 </p>
               </Section>
 
@@ -522,10 +557,11 @@ export const InstrumentsWorkspace: React.FC<OpsSectionProps> = ({
 // Languages workspace
 // ---------------------------------------------------------------------------
 export const LanguagesWorkspace: React.FC<OpsSectionProps> = ({ model }) => {
-  const englishApproved = model.measures.filter((m) => m.english === 'Operational').length;
-  const frenchApproved = model.measures.filter((m) => m.french === 'Operational').length;
-  const frenchCandidate = model.measures.filter((m) => m.french === 'Candidate').length;
-  const frenchMissing = model.measures.filter((m) => m.french === 'Missing').length;
+  // Language operability is derived from Instruments, never from Measures alone.
+  const englishApproved = model.instruments.filter((i) => i.english === 'Operational').length;
+  const frenchApproved = model.instruments.filter((i) => i.french === 'Operational').length;
+  const frenchCandidate = model.instruments.filter((i) => i.french === 'Candidate').length;
+  const frenchMissing = model.instruments.filter((i) => i.french === 'Missing').length;
 
   return (
     <div className="space-y-5">
