@@ -199,6 +199,62 @@ const CLINIC_PROFILE: SectorRecommendationProfile = {
   ],
 };
 
+// Minimal hotel experience-reference profile. Uses only already-present
+// prototype areas — it introduces no new Measures or instrument semantics.
+const HOTEL_PROFILE: SectorRecommendationProfile = {
+  id: 'hotel',
+  label: 'Hotels & accommodation',
+  nameSuggestions: ['Reception', 'Front Desk', 'Checkout', 'Room Service', 'Restaurant'],
+  recommended: [
+    {
+      measureId: 'overall_experience',
+      provenance: 'recommended',
+      reason: 'A simple starting point for how guests feel about their stay overall.',
+    },
+    {
+      measureId: 'staff_courtesy',
+      provenance: 'recommended',
+      reason: 'Captures how guests experience your frontline and service teams.',
+    },
+    {
+      measureId: 'cleanliness_comfort',
+      provenance: 'recommended',
+      reason: 'Relevant for rooms, dining and shared guest spaces.',
+    },
+    {
+      measureId: 'wait_experience',
+      provenance: 'recommended',
+      reason: 'Relevant where guests wait at reception, check-in or dining.',
+    },
+  ],
+  alsoRelevant: [
+    {
+      measureId: 'food_beverage_quality',
+      provenance: 'also_relevant',
+      reason: 'Useful where dining or room service forms part of the stay.',
+    },
+    {
+      measureId: 'likelihood_to_return',
+      provenance: 'also_relevant',
+      reason: 'A simple read on whether guests intend to stay again.',
+    },
+    {
+      measureId: 'value_for_experience',
+      provenance: 'also_relevant',
+      reason: 'Helps you see how guests weigh price against the stay.',
+    },
+  ],
+  browseGroups: [
+    { id: 'overall', label: 'Overall experience', measureIds: ['overall_experience'] },
+    { id: 'staff', label: 'Staff', measureIds: ['staff_courtesy'] },
+    { id: 'speed', label: 'Speed & waiting', measureIds: ['wait_experience', 'speed_of_service'] },
+    { id: 'outcome', label: 'Service outcome', measureIds: ['food_beverage_quality', 'order_accuracy'] },
+    { id: 'value', label: 'Value & pricing', measureIds: ['value_for_experience'] },
+    { id: 'environment', label: 'Environment', measureIds: ['cleanliness_comfort'] },
+    { id: 'return', label: 'Loyalty & return', measureIds: ['likelihood_to_return'] },
+  ],
+};
+
 const GENERIC_PROFILE: SectorRecommendationProfile = {
   id: 'generic',
   label: 'Your service',
@@ -250,6 +306,7 @@ export const SECTOR_RECOMMENDATION_PROFILES: Record<string, SectorRecommendation
   beauty: BEAUTY_PROFILE,
   cafe: CAFE_PROFILE,
   clinic: CLINIC_PROFILE,
+  hotel: HOTEL_PROFILE,
   generic: GENERIC_PROFILE,
 };
 
@@ -273,7 +330,10 @@ export function resolveRecommendationProfile(organisation: Organisation): Sector
     return BEAUTY_PROFILE;
   if (/(clinic|health|medical|dental|hospital|pharma|physio|diagnostic|lab)/.test(haystack))
     return CLINIC_PROFILE;
-  if (/(caf|hospitality|dining|restaurant|bistro|bar|food|bakery|hotel)/.test(haystack))
+  // Hotels are their own experience-reference profile — never the Café profile.
+  if (/(hotel|accommodation|resort|hostel|lodge|guesthouse|guest house)/.test(haystack))
+    return HOTEL_PROFILE;
+  if (/(caf|hospitality|dining|restaurant|bistro|food|bakery)/.test(haystack))
     return CAFE_PROFILE;
   return GENERIC_PROFILE;
 }

@@ -129,6 +129,15 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
   const hasMoreLocations =
     locations.length > 1 || organisation.onboardingData?.hasMoreLocations === 'yes';
 
+  // The Organisation's recorded customer-feedback language preference.
+  // This is configuration context, not the preview toggle: it is derived from
+  // onboarding and is never changed by the Step 4 preview selector.
+  const configuredFeedbackLanguages = useMemo(() => {
+    const recorded = organisation.onboardingData?.feedbackLanguages;
+    if (recorded && recorded.length > 0) return recorded;
+    return [organisation.primaryLanguage === 'fr' ? 'French' : 'English'];
+  }, [organisation]);
+
   const friendlyLink = `fedoo.me/${firstWordSlug(organisation.name)}-${
     slugify(pointName) || 'feedback-point'
   }`;
@@ -636,13 +645,11 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
               language={previewLanguage}
             />
 
-            {/* Language */}
+            {/* Preview language (does not change configured feedback languages) */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Languages className="w-4 h-4 text-slate-500" />
-                <span className="text-xs font-bold text-slate-800">
-                  Customer feedback language
-                </span>
+                <span className="text-xs font-bold text-slate-800">Preview language</span>
               </div>
               <div className="flex gap-2">
                 {(['en', 'fr'] as const).map((lang) => (
@@ -659,6 +666,17 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
                     {lang === 'en' ? 'English' : 'French'}
                   </button>
                 ))}
+              </div>
+              <div className="pt-1 border-t border-slate-100">
+                <div className="text-[11px] text-slate-500 leading-relaxed">
+                  Customer feedback languages recorded at setup:{' '}
+                  <span className="font-semibold text-slate-700">
+                    {configuredFeedbackLanguages.join(', ')}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                  Changing the preview language does not change what customers are offered.
+                </p>
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed">
                 Available languages will follow Fedoo-supported question translations.
@@ -807,7 +825,7 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
               />
               <ReviewRow
                 label="Languages"
-                value={previewLanguage === 'fr' ? 'English + French' : 'English'}
+                value={configuredFeedbackLanguages.join(' + ')}
               />
               <ReviewRow
                 label="Customer access"
@@ -1267,7 +1285,7 @@ const CompactCustomerPreview: React.FC<CompactCustomerPreviewProps> = ({
           </div>
 
           <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 text-center text-[9px] text-slate-400">
-            Private customer feedback • Powered by Fedoo
+            Powered by Fedoo
           </div>
         </div>
       </div>

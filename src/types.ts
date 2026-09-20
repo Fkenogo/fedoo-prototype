@@ -256,7 +256,7 @@ export interface BrowseGroup {
 }
 
 export interface SectorRecommendationProfile {
-  id: 'beauty' | 'cafe' | 'clinic' | 'generic';
+  id: 'beauty' | 'cafe' | 'clinic' | 'hotel' | 'generic';
   label: string;
   nameSuggestions: string[];
   recommended: RecommendedArea[];
