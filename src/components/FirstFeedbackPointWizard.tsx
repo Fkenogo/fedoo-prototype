@@ -687,7 +687,7 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
               <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
               <p className="text-[11px] text-slate-600 leading-relaxed">
                 This preview shows the structure of the customer experience. Actual questions
-                and wording are governed by Fedoo and may differ.
+                and wording are provided by Fedoo and may differ.
               </p>
             </div>
 
