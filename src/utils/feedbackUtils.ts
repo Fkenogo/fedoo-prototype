@@ -1,4 +1,67 @@
 import { ServiceSignal, Measure } from '../types';
+import { SCALE_DEFINITIONS } from '../data/mockData';
+
+export interface DistributionSummary {
+  favourable: number;
+  middle: number;
+  unfavourable: number;
+  total: number;
+  favourablePct: number;
+  middlePct: number;
+  unfavourablePct: number;
+}
+
+// [PROTOTYPE ASSUMPTION — Product Truth realignment]: summarises a signal's
+// distribution into favourable / middle / unfavourable using the governed
+// higher-favourable 5-point interpretation (5–4 favourable, 3 middle,
+// 2–1 unfavourable). Presentation only; production computes Measure Results
+// and Service Signals authoritatively.
+export function summarizeDistribution(
+  measure: Measure,
+  signal?: ServiceSignal
+): DistributionSummary {
+  const scale = SCALE_DEFINITIONS[measure.scaleFamily] || SCALE_DEFINITIONS.quality;
+  const scoreFor = (label: string): number => {
+    const exact = scale.find((o) => o.value.toLowerCase() === label.toLowerCase());
+    if (exact) return exact.scoreIndex;
+    const l = label.toLowerCase();
+    if (l.startsWith('neither') || l === 'fair' || l === 'middle') return 3;
+    if (/(excellent|very satisfied|very likely)/.test(l)) return 5;
+    if (/(good|satisfied|likely)/.test(l)) return 4;
+    if (/(poor|dissatisfied|unlikely)/.test(l)) return 2;
+    return 3;
+  };
+
+  let favourable = 0;
+  let middle = 0;
+  let unfavourable = 0;
+  (signal?.distribution || []).forEach((d) => {
+    const s = scoreFor(d.label);
+    if (s >= 4) favourable += d.count;
+    else if (s === 3) middle += d.count;
+    else unfavourable += d.count;
+  });
+  const total = favourable + middle + unfavourable;
+  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
+
+  return {
+    favourable,
+    middle,
+    unfavourable,
+    total,
+    favourablePct: pct(favourable),
+    middlePct: pct(middle),
+    unfavourablePct: pct(unfavourable),
+  };
+}
+
+// Factual comparison availability for the experience reference. Comparison is
+// shown only when the prototype fixture establishes a raw pp delta. Direction
+// labels are never surfaced.
+export function comparisonAvailable(signal?: ServiceSignal): boolean {
+  const m = signal?.movement;
+  return Boolean(m && m.direction !== 'unavailable' && m.deltaPoints !== undefined);
+}
 
 /**
  * [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:

@@ -36,6 +36,9 @@ interface PrototypeReviewBarProps {
   onToggleParticipantPreviewMode?: () => void;
   participantUnavailable?: boolean;
   onToggleParticipantUnavailable?: () => void;
+  // Pass 5 overview review tooling: force the no-evidence state.
+  overviewNoEvidence?: boolean;
+  onToggleOverviewNoEvidence?: () => void;
 }
 
 export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
@@ -57,6 +60,8 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
   onToggleParticipantPreviewMode,
   participantUnavailable = false,
   onToggleParticipantUnavailable,
+  overviewNoEvidence = false,
+  onToggleOverviewNoEvidence,
 }) => {
   return (
     <aside aria-label="Prototype Evaluation Panel (reference only — not production)" className="bg-slate-950 text-white border-b border-slate-800 text-xs py-2 px-3 sm:px-6 sticky top-0 z-50 shadow-md">
@@ -234,17 +239,30 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
 
           {/* Attention reference toggle (REFERENCE ONLY, Overview route) */}
           {currentRoute === 'app' && (
-            <button
-              onClick={onToggleAttentionReference}
-              title="Show the future-state Attention interaction (reference only — non-authoritative, not for production adoption)"
-              className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
-                showAttentionReference
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                  : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              Attention ref: {showAttentionReference ? 'on' : 'off'}
-            </button>
+            <>
+              <button
+                onClick={onToggleOverviewNoEvidence}
+                title="Force the Overview no-evidence experience state (review tooling)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  overviewNoEvidence
+                    ? 'bg-sky-500/20 text-sky-300 border-sky-500/50'
+                    : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                Evidence: {overviewNoEvidence ? 'none' : 'normal'}
+              </button>
+              <button
+                onClick={onToggleAttentionReference}
+                title="Show the future-state Attention interaction (reference only — non-authoritative, not for production adoption)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  showAttentionReference
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                    : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                Attention ref: {showAttentionReference ? 'on' : 'off'}
+              </button>
+            </>
           )}
 
           {/* Reset button */}
