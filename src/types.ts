@@ -182,6 +182,30 @@ export interface Organisation {
   operatingCountry: string;
   primaryLanguage: 'en' | 'fr';
   locations: Location[];
+  onboardingData?: OnboardingData;
+}
+
+export interface OnboardingData {
+  organisationName: string;
+  country: string;
+  city: string;
+  websiteOrSocial?: string;
+  sector: string;
+  category: string;
+  services: string[];
+  serviceModels: string[];
+  contextualAnswers: Record<string, string>;
+  firstLocationName: string;
+  firstLocationCity: string;
+  firstLocationAddress?: string;
+  hasMoreLocations: 'no' | 'yes';
+  timezone: string;
+  timezoneLabel: string;
+  adminName: string;
+  adminEmail: string;
+  adminPhone?: string;
+  adminLanguage: 'en' | 'fr';
+  feedbackLanguages: string[];
 }
 
 export interface TeamMember {

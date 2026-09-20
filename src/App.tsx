@@ -29,7 +29,8 @@ import {
   ServiceSignal, 
   FeedbackSession, 
   NeedsReviewItem,
-  TeamMember 
+  TeamMember,
+  OnboardingData
 } from './types';
 
 import {
@@ -385,23 +386,56 @@ export default function App() {
       {currentRoute === 'setup' ? (
         <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <FirstRunSetup
-            onCompleteSetup={(newEndpoint) => {
-              if (newEndpoint) {
-                setEndpoints((prev) => [newEndpoint, ...prev]);
-                setLocations((prev) =>
-                  prev.map((l) =>
-                    l.id === newEndpoint.locationId
-                      ? { ...l, endpointsCount: l.endpointsCount + 1, status: 'active' }
-                      : l
-                  )
-                );
+            onCompleteSetup={(onboardingData, destination) => {
+              const newLocationId = 'loc-' + Date.now();
+              const newLocation: Location = {
+                id: newLocationId,
+                name: onboardingData.firstLocationName,
+                type: 'physical',
+                addressOrDetail: onboardingData.firstLocationAddress || onboardingData.firstLocationCity,
+                managerName: onboardingData.adminName,
+                totalResponses: 0,
+                lastFeedbackAt: null,
+                endpointsCount: 0,
+                activeMeasuresCount: 0,
+                status: 'inactive',
+              };
+
+              const newOrg: Organisation = {
+                id: 'org-' + Date.now(),
+                name: onboardingData.organisationName,
+                businessType: `${onboardingData.sector} (${onboardingData.category})`,
+                operatingCountry: onboardingData.country,
+                primaryLanguage: onboardingData.adminLanguage,
+                locations: [newLocation],
+                onboardingData: onboardingData,
+              };
+
+              const newAdmin: TeamMember = {
+                id: 'user-' + Date.now(),
+                name: onboardingData.adminName,
+                email: onboardingData.adminEmail,
+                role: 'Organisation Admin',
+                locationScope: 'all',
+              };
+
+              // Apply newly onboarded organisation & location to prototype state
+              setOrganisation(newOrg);
+              setLocations([newLocation]);
+              setTeamMembers([newAdmin]);
+              setCurrentScope(newLocationId);
+              setPrimaryLanguage(onboardingData.adminLanguage);
+
+              if (destination === 'feedback_point') {
+                setCurrentRoute('app');
+                setActiveTab('feedback-points');
+                setIsCreateEndpointModalOpen(true);
+                showToast(`${onboardingData.organisationName} created! Let's set up your first feedback point.`);
+              } else {
+                setCurrentRoute('app');
+                setActiveTab('overview');
+                showToast(`${onboardingData.organisationName} is ready in Fedoo.`);
               }
-              setCurrentRoute('app');
-              setActiveTab('overview');
-              showToast('Setup complete! Your first feedback point is live.');
-            }}
-            onOpenCustomerPage={() => {
-              setCurrentRoute('feedback');
             }}
           />
         </main>
