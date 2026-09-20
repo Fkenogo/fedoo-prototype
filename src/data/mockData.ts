@@ -432,14 +432,15 @@ export const MULTI_LOCATION_ENDPOINTS: Endpoint[] = [
     configHistory: [
       {
         id: 'hist-1',
-        timestamp: '2026-08-01',
-        description: 'Added "Food & Beverage Quality" following kitchen menu launch',
+        timestamp: '1 Aug',
+        description: 'Added Food & Beverage Quality',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy', 'food_beverage_quality', 'likelihood_to_return'],
+        added: ['food_beverage_quality'],
       },
       {
         id: 'hist-0',
-        timestamp: '2026-06-12',
-        description: 'Published initial feedback point with recommended 4 questions',
+        timestamp: '12 Jun',
+        description: 'Feedback Point activated with 4 areas',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy', 'likelihood_to_return'],
       },
     ],
@@ -460,7 +461,7 @@ export const MULTI_LOCATION_ENDPOINTS: Endpoint[] = [
       {
         id: 'hist-c0',
         timestamp: '2026-07-01',
-        description: 'Published rapid 3-question counter feedback point',
+        description: 'Feedback Point activated with 3 areas',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy'],
       },
     ],
@@ -481,7 +482,7 @@ export const MULTI_LOCATION_ENDPOINTS: Endpoint[] = [
       {
         id: 'hist-a0',
         timestamp: '2026-06-20',
-        description: 'Published 5-question seating feedback point',
+        description: 'Feedback Point activated with 5 areas',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy', 'food_beverage_quality', 'likelihood_to_return'],
       },
     ],
@@ -502,7 +503,7 @@ export const MULTI_LOCATION_ENDPOINTS: Endpoint[] = [
       {
         id: 'hist-cb0',
         timestamp: '2026-08-15',
-        description: 'Published initial feedback point for newly opened CBD branch',
+        description: 'Feedback Point activated with 5 areas',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy', 'food_beverage_quality', 'likelihood_to_return'],
       },
     ],
@@ -1115,7 +1116,7 @@ export const SINGLE_LOCATION_ENDPOINTS: Endpoint[] = [
       {
         id: 'hist-b0',
         timestamp: '2026-07-10',
-        description: 'Published 5-question dining room feedback point',
+        description: 'Feedback Point activated with 5 areas',
         activeMeasureIds: ['overall_experience', 'speed_of_service', 'staff_courtesy', 'food_beverage_quality', 'likelihood_to_return'],
       },
     ],
@@ -1436,14 +1437,64 @@ export const VERA_BEAUTY_ORGANISATION: Organisation = {
       managerName: 'Vera Niyonkuru',
       totalResponses: 0,
       lastFeedbackAt: null,
-      endpointsCount: 0,
-      activeMeasuresCount: 0,
-      status: 'inactive',
+      endpointsCount: 2,
+      activeMeasuresCount: 6,
+      status: 'active',
     },
   ],
 };
 
-export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [];
+// Pass 3: two Feedback Points at one Location with overlapping but different
+// tracking sets, proving Location ≠ Feedback Point and that What We Track is
+// not one universal questionnaire. Prototype content only.
+export const VERA_BEAUTY_ENDPOINTS: Endpoint[] = [
+  {
+    id: 'ep-vera-main-counter',
+    humanName: 'Main Counter',
+    locationId: 'loc-vera-main',
+    status: 'active',
+    activeMeasureIds: ['overall_experience', 'staff_courtesy', 'wait_experience'],
+    supportedChannels: ['qr', 'link'],
+    createdAt: '12 Sep',
+    lastResponseAt: null,
+    totalResponses: 0,
+    burdenLevel: 'quick',
+    contextNote: 'At the reception counter after customers finish their visit.',
+    friendlyLink: 'fedoo.me/vera-main-counter',
+    channelNotes: 'Counter plaque next to the payment point.',
+    configHistory: [
+      {
+        id: 'hist-vera-mc-0',
+        timestamp: '12 Sep',
+        description: 'Feedback Point activated with 3 areas',
+        activeMeasureIds: ['overall_experience', 'staff_courtesy', 'wait_experience'],
+      },
+    ],
+  },
+  {
+    id: 'ep-vera-treatment-exit',
+    humanName: 'Treatment Exit',
+    locationId: 'loc-vera-main',
+    status: 'active',
+    activeMeasureIds: ['overall_experience', 'treatment_service_result', 'practitioner_skill', 'treatment_comfort'],
+    supportedChannels: ['qr'],
+    createdAt: '12 Sep',
+    lastResponseAt: null,
+    totalResponses: 0,
+    burdenLevel: 'standard',
+    contextNote: 'At the styling chair as customers finish their treatment.',
+    friendlyLink: 'fedoo.me/vera-treatment-exit',
+    channelNotes: 'Small stand by the styling mirror.',
+    configHistory: [
+      {
+        id: 'hist-vera-te-0',
+        timestamp: '12 Sep',
+        description: 'Feedback Point activated with 4 areas',
+        activeMeasureIds: ['overall_experience', 'treatment_service_result', 'practitioner_skill', 'treatment_comfort'],
+      },
+    ],
+  },
+];
 export const VERA_BEAUTY_SESSIONS: FeedbackSession[] = [];
 export const VERA_BEAUTY_NEEDS_REVIEW: NeedsReviewItem[] = [];
 
@@ -1465,14 +1516,38 @@ export const CITY_CLINIC_ORGANISATION: Organisation = {
       managerName: 'Dr. Alain Bizimana',
       totalResponses: 0,
       lastFeedbackAt: null,
-      endpointsCount: 0,
-      activeMeasuresCount: 0,
-      status: 'inactive',
+      endpointsCount: 1,
+      activeMeasuresCount: 4,
+      status: 'active',
     },
   ],
 };
 
-export const CITY_CLINIC_ENDPOINTS: Endpoint[] = [];
+export const CITY_CLINIC_ENDPOINTS: Endpoint[] = [
+  {
+    id: 'ep-clinic-reception',
+    humanName: 'Reception',
+    locationId: 'loc-clinic-main',
+    status: 'active',
+    activeMeasureIds: ['overall_experience', 'appointment_access', 'wait_experience', 'privacy'],
+    supportedChannels: ['qr', 'link'],
+    createdAt: '12 Sep',
+    lastResponseAt: null,
+    totalResponses: 0,
+    burdenLevel: 'standard',
+    contextNote: 'At reception as patients leave the clinic.',
+    friendlyLink: 'fedoo.me/city-reception',
+    channelNotes: 'Counter card at the reception desk.',
+    configHistory: [
+      {
+        id: 'hist-clinic-0',
+        timestamp: '12 Sep',
+        description: 'Feedback Point activated with 4 areas',
+        activeMeasureIds: ['overall_experience', 'appointment_access', 'wait_experience', 'privacy'],
+      },
+    ],
+  },
+];
 export const CITY_CLINIC_SESSIONS: FeedbackSession[] = [];
 export const CITY_CLINIC_NEEDS_REVIEW: NeedsReviewItem[] = [];
 
@@ -1498,11 +1573,15 @@ export function buildEmptySignals(locationId: string): Record<string, ServiceSig
     'likelihood_to_return',
     'treatment_service_result',
     'practitioner_skill',
+    'treatment_comfort',
     'wait_experience',
     'appointment_access',
     'clinical_explanation_clarity',
     'clinician_empathy',
     'privacy',
+    'cleanliness_comfort',
+    'value_for_experience',
+    'order_accuracy',
   ];
 
   const signals: Record<string, ServiceSignal> = {};
