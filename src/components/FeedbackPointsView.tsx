@@ -111,7 +111,7 @@ export const FeedbackPointsView: React.FC<FeedbackPointsViewProps> = ({
                         {loc?.name || 'Location'}
                       </span>
                       <span>•</span>
-                      <span>{activeMeasureCount} questions tracked</span>
+                      <span>{activeMeasureCount} areas tracked</span>
                       <span>•</span>
                       <span>Last feedback {ep.lastResponseAt || 'none yet'}</span>
                     </div>

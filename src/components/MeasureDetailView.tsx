@@ -75,7 +75,7 @@ export const MeasureDetailView: React.FC<MeasureDetailViewProps> = ({
           className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to What We Track</span>
+          <span>Back</span>
         </button>
         <div className="text-xs font-semibold text-slate-500">
           Viewing <span className="font-bold text-slate-900">{scopeLocationName}</span>

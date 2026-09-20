@@ -94,7 +94,7 @@ export const FeedbackPointDetailView: React.FC<FeedbackPointDetailViewProps> = (
         className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Feedback Points</span>
+        <span>Back</span>
       </button>
 
       {/* Identity */}

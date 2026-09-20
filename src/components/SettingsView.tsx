@@ -238,7 +238,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs max-w-2xl space-y-4">
           <h2 className="text-base font-bold text-slate-900">Language</h2>
           <p className="text-xs text-slate-600 leading-relaxed">
-            This shell demonstrates English/French presentation as an experience pattern. Governed measurement languages are separate Instruments: only English v1 is approved in current Product Truth — French measurement equivalence is deferred and not approved.
+            English is the Organisation-facing language. The languages your customers can use are
+            chosen during setup. French customer translations are still in preparation and are not
+            yet available for comparison.
           </p>
 
           <div className="space-y-3 pt-2 text-xs">
@@ -266,7 +268,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               />
               <div>
                 <span className="font-bold text-slate-900">Français (shell pattern)</span>
-                <p className="text-slate-500 text-[11px]">Presentation pattern only — French measurement Instruments deferred, no equivalence approved</p>
+                <p className="text-slate-500 text-[11px]">French presentation only — customer translations still in preparation</p>
               </div>
             </label>
           </div>
