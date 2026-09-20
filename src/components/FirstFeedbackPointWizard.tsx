@@ -995,7 +995,9 @@ export const FirstFeedbackPointWizard: React.FC<FirstFeedbackPointWizardProps> =
           <div className="py-6">
             <ParticipantFeedbackView
               endpoint={previewEndpoint}
+              location={selectedLocation}
               locationName={selectedLocation?.name}
+              organisation={organisation}
               organisationName={organisation.name}
               measures={measures}
               primaryLanguage={previewLanguage}

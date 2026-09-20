@@ -376,6 +376,7 @@ export const MULTI_LOCATION_ORGANISATION: Organisation = {
   businessType: 'Hospitality (Café & Casual Dining)',
   operatingCountry: 'Kenya',
   primaryLanguage: 'en',
+  feedbackLanguages: ['English'],
   locations: [
     {
       id: 'loc-main',
@@ -1083,6 +1084,7 @@ export const SINGLE_LOCATION_ORGANISATION: Organisation = {
   businessType: 'Casual Dining Restaurant',
   operatingCountry: 'Kenya',
   primaryLanguage: 'en',
+  feedbackLanguages: ['English'],
   locations: [
     {
       id: 'loc-bistro-only',
@@ -1132,6 +1134,7 @@ export const EMPTY_ORGANISATION: Organisation = {
   businessType: 'Bakery & Coffee Counter',
   operatingCountry: 'Kenya',
   primaryLanguage: 'en',
+  feedbackLanguages: ['English'],
   locations: [
     {
       id: 'loc-fresh-main',
@@ -1428,6 +1431,7 @@ export const VERA_BEAUTY_ORGANISATION: Organisation = {
   businessType: 'Beauty & Personal Care (Salon)',
   operatingCountry: 'Burundi',
   primaryLanguage: 'en',
+  feedbackLanguages: ['English', 'French'],
   locations: [
     {
       id: 'loc-vera-main',
@@ -1507,6 +1511,7 @@ export const CITY_CLINIC_ORGANISATION: Organisation = {
   businessType: 'Healthcare & Clinic',
   operatingCountry: 'Burundi',
   primaryLanguage: 'en',
+  feedbackLanguages: ['English'],
   locations: [
     {
       id: 'loc-clinic-main',
