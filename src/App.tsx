@@ -16,6 +16,7 @@ import { ParticipantFeedbackView } from './components/ParticipantFeedbackView';
 import { FirstRunSetup } from './components/FirstRunSetup';
 import { OperatorView } from './components/OperatorView';
 import { FirstFeedbackPointWizard } from './components/FirstFeedbackPointWizard';
+import { AddAreaToFeedbackPointsModal } from './components/AddAreaToFeedbackPointsModal';
 import { PrintFlyerModal } from './components/PrintFlyerModal';
 
 import { 
@@ -107,6 +108,8 @@ export default function App() {
 
   // Modals
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
+  // Pass 3: lightweight "where would you like to track this?" flow.
+  const [addAreaMeasureId, setAddAreaMeasureId] = useState<string | null>(null);
 
   // REFERENCE ONLY (prototype review tooling): toggles the future-state
   // Attention interaction inside the Organisation Overview. Default OFF —
@@ -270,18 +273,32 @@ export default function App() {
           : ep
       )
     );
-    showToast('Feedback point status updated.');
+    const target = endpoints.find((ep) => ep.id === endpointId);
+    const willPause = target?.status === 'active';
+    showToast(
+      willPause
+        ? `${target?.humanName || 'Feedback Point'} paused. Existing feedback and history remain available.`
+        : `${target?.humanName || 'Feedback Point'} resumed — customers can share feedback again.`
+    );
   };
 
   const handleSaveEndpointMeasureConfiguration = (newMeasureIds: string[], reasonNote: string) => {
     if (!endpointForTrackingChange) return;
+
+    const previousIds = endpointForTrackingChange.activeMeasureIds;
+    const added = newMeasureIds.filter((id) => !previousIds.includes(id));
+    const removed = previousIds.filter((id) => !newMeasureIds.includes(id));
 
     const updatedHistoryItem = {
       id: `hist-${Date.now()}`,
       timestamp: 'Just now',
       description: reasonNote,
       activeMeasureIds: newMeasureIds,
+      added,
+      removed,
     };
+
+    const updatedName = endpointForTrackingChange.humanName;
 
     setEndpoints((prev) =>
       prev.map((ep) => {
@@ -298,7 +315,81 @@ export default function App() {
     );
 
     setIsChangingWhatWeTrack(false);
-    showToast('Configuration published (prototype simulation). Production supersedes the governed configuration for future sessions.');
+    showToast(`${updatedName} updated — future customer feedback will use your new tracking set.`);
+  };
+
+  // Pass 3: add one area to one or more Feedback Points.
+  const handleAddAreaToEndpoints = (endpointIds: string[]) => {
+    const measureId = addAreaMeasureId;
+    if (!measureId || endpointIds.length === 0) return;
+    const measureName = measures.find((m) => m.id === measureId)?.name || 'Area';
+
+    setEndpoints((prev) =>
+      prev.map((ep) => {
+        if (!endpointIds.includes(ep.id)) return ep;
+        if (ep.activeMeasureIds.includes(measureId)) return ep;
+        const nextIds = [...ep.activeMeasureIds, measureId];
+        return {
+          ...ep,
+          activeMeasureIds: nextIds,
+          burdenLevel: nextIds.length <= 3 ? 'quick' : nextIds.length <= 5 ? 'standard' : 'extended',
+          configHistory: [
+            {
+              id: `hist-${Date.now()}-${ep.id}`,
+              timestamp: 'Just now',
+              description: `Added ${measureName}`,
+              activeMeasureIds: nextIds,
+              added: [measureId],
+            },
+            ...(ep.configHistory || []),
+          ],
+        };
+      })
+    );
+
+    setAddAreaMeasureId(null);
+    showToast(
+      `${measureName} added to ${endpointIds.length} ${
+        endpointIds.length === 1 ? 'Feedback Point' : 'Feedback Points'
+      }.`
+    );
+  };
+
+  // Pass 3: stop tracking one area at one Feedback Point.
+  const handleRemoveAreaFromEndpoint = (endpointId: string, measureId: string) => {
+    const target = endpoints.find((ep) => ep.id === endpointId);
+    if (!target) return;
+    if (target.activeMeasureIds.length <= 1) {
+      showToast('A Feedback Point needs at least one area to track.');
+      return;
+    }
+    const measureName = measures.find((m) => m.id === measureId)?.name || 'Area';
+    const nextIds = target.activeMeasureIds.filter((id) => id !== measureId);
+
+    setEndpoints((prev) =>
+      prev.map((ep) => {
+        if (ep.id !== endpointId) return ep;
+        return {
+          ...ep,
+          activeMeasureIds: nextIds,
+          burdenLevel: nextIds.length <= 3 ? 'quick' : nextIds.length <= 5 ? 'standard' : 'extended',
+          configHistory: [
+            {
+              id: `hist-${Date.now()}-${ep.id}`,
+              timestamp: 'Just now',
+              description: `Removed ${measureName}`,
+              activeMeasureIds: nextIds,
+              removed: [measureId],
+            },
+            ...(ep.configHistory || []),
+          ],
+        };
+      })
+    );
+
+    showToast(
+      `${measureName} removed at ${target.humanName}. Existing feedback remains in your history.`
+    );
   };
 
   const handleCreateEndpoint = (newEp: Endpoint) => {
@@ -557,8 +648,9 @@ export default function App() {
               <ChangeWhatWeTrackView
                 endpoint={endpointForTrackingChange}
                 allMeasures={measures}
+                organisation={organisation}
                 onCancel={() => setIsChangingWhatWeTrack(false)}
-                onSaveConfiguration={handleSaveEndpointMeasureConfiguration}
+                onApplyChanges={handleSaveEndpointMeasureConfiguration}
               />
             ) : selectedEndpoint ? (
               /* SUB-VIEW B: FEEDBACK POINT DETAIL VIEW */
@@ -578,6 +670,7 @@ export default function App() {
                   setCurrentRoute('feedback');
                 }}
                 onOpenPrintFlyer={(ep) => setPrintFlyerEndpoint(ep)}
+                onViewAllActivity={() => handleTabChange('activity')}
               />
             ) : selectedMeasure ? (
               /* SUB-VIEW C: MEASURE DETAIL VIEW */
@@ -586,11 +679,15 @@ export default function App() {
                 currentScope={currentScope}
                 scopeLocationName={scopeLocationName}
                 locations={locations}
+                endpoints={endpoints}
                 signals={signals}
                 recentSessions={sessions}
                 onBack={() => setSelectedMeasureId(null)}
-                onSelectLocation={(locId) => {
-                  setCurrentScope(locId);
+                onAddToAnotherFeedbackPoint={(measureId) => setAddAreaMeasureId(measureId)}
+                onStopTrackingAt={handleRemoveAreaFromEndpoint}
+                onOpenFeedbackPoint={(epId) => {
+                  setSelectedMeasureId(null);
+                  setSelectedEndpointId(epId);
                 }}
               />
             ) : selectedLocation ? (
@@ -642,11 +739,16 @@ export default function App() {
             ) : activeTab === 'what-we-track' ? (
               /* TAB 3: WHAT WE TRACK */
               <WhatWeTrackView
+                organisation={organisation}
                 measures={measures}
                 signals={signals}
+                endpoints={endpoints}
+                locations={locations}
                 currentScope={currentScope}
                 scopeLocationName={scopeLocationName}
                 onSelectMeasure={(id) => setSelectedMeasureId(id)}
+                onAddAreaToFeedbackPoints={(measureId) => setAddAreaMeasureId(measureId)}
+                onViewActivity={() => handleTabChange('activity')}
               />
             ) : activeTab === 'locations' ? (
               /* TAB 4: LOCATIONS */
@@ -684,6 +786,17 @@ export default function App() {
       )}
 
       {/* 4. MODALS */}
+      {/* Add an area to one or more Feedback Points (Pass 3) */}
+      {addAreaMeasureId && (
+        <AddAreaToFeedbackPointsModal
+          measure={measures.find((m) => m.id === addAreaMeasureId)!}
+          endpoints={endpoints}
+          locations={locations}
+          onClose={() => setAddAreaMeasureId(null)}
+          onApply={handleAddAreaToEndpoints}
+        />
+      )}
+
       {/* Printable Flyer Preview Modal */}
       {printFlyerEndpoint && (
         <PrintFlyerModal

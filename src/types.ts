@@ -77,6 +77,11 @@ export interface EndpointConfigHistoryEntry {
   timestamp: string;
   description: string;
   activeMeasureIds: string[];
+  // Business-facing change detail for the Feedback Point "Changes" list.
+  // Prototype display only; production preserves the governed lineage behind
+  // the scenes and never exposes configuration IDs to the Organisation.
+  added?: string[];
+  removed?: string[];
 }
 
 export interface Endpoint {
