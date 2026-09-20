@@ -193,6 +193,10 @@ export interface Organisation {
   primaryLanguage: 'en' | 'fr';
   locations: Location[];
   onboardingData?: OnboardingData;
+  // Customer-feedback languages recorded for the Organisation (display labels,
+  // e.g. 'English', 'French'). Drives the participant language selector.
+  // [PROTOTYPE ONLY] Production supplies approved language variants.
+  feedbackLanguages?: string[];
 }
 
 export interface OnboardingData {

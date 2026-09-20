@@ -74,8 +74,10 @@ export default function App() {
   // Top-Level Route Perspective: 'app' (Organisation), 'setup' (First-run), 'feedback' (Customer Page), 'operator' (Platform Operator)
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('app');
 
-  // Participant view mode: full-width responsive standalone vs simulated mobile phone frame
-  const [participantViewMode, setParticipantViewMode] = useState<'standalone' | 'phone'>('phone');
+  // Participant view mode: full-width responsive standalone vs simulated mobile phone frame.
+  // The real participant route defaults to a full-viewport mobile experience;
+  // the phone frame is organisation preview / Founder review tooling only.
+  const [participantViewMode, setParticipantViewMode] = useState<'standalone' | 'phone'>('standalone');
 
   // Active navigation tab in Organisation dashboard
   const [activeTab, setActiveTab] = useState<AppTab | 'settings'>('overview');
@@ -105,6 +107,12 @@ export default function App() {
 
   // Customer experience target endpoint
   const [customerEndpointId, setCustomerEndpointId] = useState<string | null>(null);
+
+  // Pass 4 participant review tooling (prototype only).
+  const [participantPreviewMode, setParticipantPreviewMode] = useState(false);
+  const [participantStatusOverride, setParticipantStatusOverride] =
+    useState<'active' | 'paused' | null>(null);
+  const [participantUnavailable, setParticipantUnavailable] = useState(false);
 
   // Modals
   const [printFlyerEndpoint, setPrintFlyerEndpoint] = useState<Endpoint | null>(null);
@@ -180,6 +188,24 @@ export default function App() {
       setCurrentScope(EMPTY_ORGANISATION.locations[0].id);
       showToast('Loaded New Organisation Scenario: Zero Data / Fresh Setup');
     }
+  };
+
+  // Organisation-side "Test as customer": opens the participant experience in
+  // preview mode (never records).
+  const openParticipantPreview = (endpointId: string | null) => {
+    setCustomerEndpointId(endpointId);
+    setParticipantPreviewMode(true);
+    setParticipantStatusOverride(null);
+    setParticipantUnavailable(false);
+    setCurrentRoute('feedback');
+    window.scrollTo({ top: 0 });
+  };
+
+  const closeParticipant = () => {
+    setCurrentRoute('app');
+    setParticipantPreviewMode(false);
+    setParticipantStatusOverride(null);
+    setParticipantUnavailable(false);
   };
 
   // Opens the Pass 2 guided First Feedback Point flow.
@@ -482,6 +508,14 @@ export default function App() {
           if (route === 'app') {
             setIsChangingWhatWeTrack(false);
           }
+          if (route === 'feedback') {
+            // Review-bar "Customer Page" simulates a real participant by
+            // default; preview/status overrides are toggled separately.
+            setParticipantPreviewMode(false);
+            setParticipantStatusOverride(null);
+            setParticipantUnavailable(false);
+            setCustomerEndpointId(endpoints[0]?.id ?? null);
+          }
         }}
         currentScenario={currentScenario}
         onScenarioChange={loadScenarioData}
@@ -490,6 +524,20 @@ export default function App() {
         onResetData={handleResetData}
         showAttentionReference={showAttentionReference}
         onToggleAttentionReference={() => setShowAttentionReference((v) => !v)}
+        participantScenarios={endpoints.map((ep) => ({
+          id: ep.id,
+          label: `${locations.find((l) => l.id === ep.locationId)?.name || 'Location'} · ${ep.humanName}`,
+        }))}
+        selectedParticipantScenarioId={activeCustomerEndpoint?.id ?? null}
+        onSelectParticipantScenario={(id) => setCustomerEndpointId(id)}
+        participantStatus={participantStatusOverride ?? 'active'}
+        onToggleParticipantStatus={() =>
+          setParticipantStatusOverride((prev) => (prev === 'paused' ? 'active' : 'paused'))
+        }
+        participantPreviewMode={participantPreviewMode}
+        onToggleParticipantPreviewMode={() => setParticipantPreviewMode((v) => !v)}
+        participantUnavailable={participantUnavailable}
+        onToggleParticipantUnavailable={() => setParticipantUnavailable((v) => !v)}
       />
 
       {/* 2. LIVE TOAST NOTIFICATION */}
@@ -595,12 +643,18 @@ export default function App() {
         <main className="flex-1 w-full bg-slate-100 flex items-center justify-center p-0 sm:p-4">
           <ParticipantFeedbackView
             endpoint={activeCustomerEndpoint}
+            location={activeCustomerLocation}
             locationName={activeCustomerLocation?.name || 'Main Location'}
+            organisation={organisation}
             organisationName={organisation.name}
             measures={measures}
+            primaryLanguage={organisation.primaryLanguage}
             viewMode={participantViewMode}
+            previewMode={participantPreviewMode}
+            overrideStatus={participantStatusOverride}
+            unavailable={participantUnavailable}
             onSubmitFeedback={handleParticipantFeedbackSubmit}
-            onClose={() => setCurrentRoute('app')}
+            onClose={closeParticipant}
           />
         </main>
       ) : currentRoute === 'operator' ? (
@@ -622,10 +676,7 @@ export default function App() {
               setCurrentScope(scopeId);
               setSelectedLocationId(null);
             }}
-            onOpenCustomerView={() => {
-              setCustomerEndpointId(null);
-              setCurrentRoute('feedback');
-            }}
+            onOpenCustomerView={() => openParticipantPreview(null)}
             onOpenSettings={() => {
               handleTabChange('settings');
             }}
@@ -665,10 +716,7 @@ export default function App() {
                   setEndpointIdForTrackingChange(selectedEndpoint.id);
                   setIsChangingWhatWeTrack(true);
                 }}
-                onOpenCustomerViewForEndpoint={(epId) => {
-                  setCustomerEndpointId(epId);
-                  setCurrentRoute('feedback');
-                }}
+                onOpenCustomerViewForEndpoint={(epId) => openParticipantPreview(epId)}
                 onOpenPrintFlyer={(ep) => setPrintFlyerEndpoint(ep)}
                 onViewAllActivity={() => handleTabChange('activity')}
               />
@@ -731,10 +779,7 @@ export default function App() {
                 measures={measures}
                 onSelectEndpoint={(id) => setSelectedEndpointId(id)}
                 onCreateEndpointClick={openFeedbackPointWizard}
-                onOpenCustomerViewForEndpoint={(epId) => {
-                  setCustomerEndpointId(epId);
-                  setCurrentRoute('feedback');
-                }}
+                onOpenCustomerViewForEndpoint={(epId) => openParticipantPreview(epId)}
               />
             ) : activeTab === 'what-we-track' ? (
               /* TAB 3: WHAT WE TRACK */

@@ -26,6 +26,16 @@ interface PrototypeReviewBarProps {
   // Organisation Overview for prototype review. Default off; never production.
   showAttentionReference: boolean;
   onToggleAttentionReference: () => void;
+  // Pass 4 participant review tooling (prototype only; Customer Page route).
+  participantScenarios?: { id: string; label: string }[];
+  selectedParticipantScenarioId?: string | null;
+  onSelectParticipantScenario?: (id: string) => void;
+  participantStatus?: 'active' | 'paused';
+  onToggleParticipantStatus?: () => void;
+  participantPreviewMode?: boolean;
+  onToggleParticipantPreviewMode?: () => void;
+  participantUnavailable?: boolean;
+  onToggleParticipantUnavailable?: () => void;
 }
 
 export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
@@ -38,6 +48,15 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
   onResetData,
   showAttentionReference,
   onToggleAttentionReference,
+  participantScenarios = [],
+  selectedParticipantScenarioId = null,
+  onSelectParticipantScenario,
+  participantStatus = 'active',
+  onToggleParticipantStatus,
+  participantPreviewMode = false,
+  onToggleParticipantPreviewMode,
+  participantUnavailable = false,
+  onToggleParticipantUnavailable,
 }) => {
   return (
     <aside aria-label="Prototype Evaluation Panel (reference only — not production)" className="bg-slate-950 text-white border-b border-slate-800 text-xs py-2 px-3 sm:px-6 sticky top-0 z-50 shadow-md">
@@ -134,28 +153,83 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             </select>
           </div>
 
-          {/* Device viewport toggle when in feedback view */}
+          {/* Participant review tooling (Customer Page route) */}
           {currentRoute === 'feedback' && (
-            <div className="flex items-center bg-slate-900 rounded-lg border border-slate-800 p-0.5">
+            <>
+              {participantScenarios.length > 0 && (
+                <div className="flex items-center gap-1.5 text-[11px]">
+                  <span className="text-slate-400 hidden lg:inline">Feedback Point:</span>
+                  <select
+                    value={selectedParticipantScenarioId ?? ''}
+                    onChange={(e) => onSelectParticipantScenario?.(e.target.value)}
+                    className="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 max-w-[190px]"
+                  >
+                    {participantScenarios.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <button
-                onClick={() => onParticipantViewModeChange('standalone')}
-                className={`p-1 rounded-md transition-colors ${
-                  participantViewMode === 'standalone' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
+                onClick={onToggleParticipantStatus}
+                title="Simulate the Feedback Point's active or paused state (review tooling)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  participantStatus === 'paused'
+                    ? 'bg-slate-500/20 text-slate-200 border-slate-500/50'
+                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
                 }`}
-                title="Full Responsive Web Page"
               >
-                <Monitor className="w-3.5 h-3.5" />
+                State: {participantStatus}
               </button>
+
               <button
-                onClick={() => onParticipantViewModeChange('phone')}
-                className={`p-1 rounded-md transition-colors ${
-                  participantViewMode === 'phone' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
+                onClick={onToggleParticipantPreviewMode}
+                title="Preview mode never records a response (review tooling)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  participantPreviewMode
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                    : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
                 }`}
-                title="Simulated Phone Frame"
               >
-                <Smartphone className="w-3.5 h-3.5" />
+                Preview: {participantPreviewMode ? 'on' : 'off'}
               </button>
-            </div>
+
+              <button
+                onClick={onToggleParticipantUnavailable}
+                title="Simulate an unavailable or invalid feedback link (review tooling)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  participantUnavailable
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
+                    : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                Link: {participantUnavailable ? 'invalid' : 'ok'}
+              </button>
+
+              <div className="flex items-center bg-slate-900 rounded-lg border border-slate-800 p-0.5">
+                <button
+                  onClick={() => onParticipantViewModeChange('standalone')}
+                  className={`p-1 rounded-md transition-colors ${
+                    participantViewMode === 'standalone' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Full-viewport mobile experience (real participant route)"
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => onParticipantViewModeChange('phone')}
+                  className={`p-1 rounded-md transition-colors ${
+                    participantViewMode === 'phone' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Simulated phone frame (organisation preview / review)"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </>
           )}
 
           {/* Attention reference toggle (REFERENCE ONLY, Overview route) */}
