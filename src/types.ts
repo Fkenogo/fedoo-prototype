@@ -91,6 +91,11 @@ export interface Endpoint {
   totalResponses: number;
   burdenLevel: BurdenLevel;
   channelNotes?: string;
+  // Prototype experience context for the Feedback Point (human-readable only).
+  // Not product identity: production keeps the persistent access identity hidden.
+  contextNote?: string;
+  // Friendly, persistent customer-facing access link (prototype display only).
+  friendlyLink?: string;
   configHistory: EndpointConfigHistoryEntry[];
 }
 
@@ -219,6 +224,42 @@ export interface TeamMember {
 }
 
 // Shell & Prototype Routing Types
-export type AppRoute = 'app' | 'setup' | 'feedback' | 'operator';
+export type AppRoute = 'app' | 'setup' | 'feedback-point-setup' | 'feedback' | 'operator';
 export type AppTab = 'overview' | 'feedback-points' | 'what-we-track' | 'locations' | 'activity';
-export type PrototypeScenario = 'multi-location' | 'single-location' | 'empty-state';
+export type PrototypeScenario =
+  | 'multi-location'
+  | 'single-location'
+  | 'empty-state'
+  | 'vera-beauty'
+  | 'city-clinic';
+
+// ---------------------------------------------------------------------------
+// FIRST FEEDBACK POINT — RECOMMENDATION EXPERIENCE TYPES (PROTOTYPE ONLY)
+// ---------------------------------------------------------------------------
+// [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
+// These types describe how Fedoo's recommendation EXPERIENCE is demonstrated,
+// not the governed recommendation/applicability rules. Production resolves
+// eligibility, applicability, Instruments and Question Sets from Product Truth.
+export type AreaProvenance = 'recommended' | 'also_relevant' | 'browse';
+
+export interface RecommendedArea {
+  measureId: string;
+  provenance: AreaProvenance;
+  // Plain-language reason shown to the Organisation. Never exposes rule logic.
+  reason?: string;
+}
+
+export interface BrowseGroup {
+  id: string;
+  label: string;
+  measureIds: string[];
+}
+
+export interface SectorRecommendationProfile {
+  id: 'beauty' | 'cafe' | 'clinic' | 'generic';
+  label: string;
+  nameSuggestions: string[];
+  recommended: RecommendedArea[];
+  alsoRelevant: RecommendedArea[];
+  browseGroups: BrowseGroup[];
+}

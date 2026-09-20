@@ -29,6 +29,9 @@ interface OverviewViewProps {
   onNavigateTab: (tab: AppTab) => void;
   onSelectEndpoint: (endpointId: string) => void;
   onStartSetup: () => void;
+  // Opens the Pass 2 guided First Feedback Point flow. When omitted, the
+  // empty-state primary CTA falls back to the Feedback Points tab.
+  onCreateFeedbackPoint?: () => void;
   // REFERENCE ONLY: renders the future-state Attention interaction for
   // prototype review. Default false — never part of the adopted production
   // Overview. Enabled exclusively via prototype review tooling.
@@ -48,6 +51,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onNavigateTab,
   onSelectEndpoint,
   onStartSetup,
+  onCreateFeedbackPoint,
   showAttentionReference = false,
 }) => {
   // Filter endpoints and sessions to the current scope
@@ -88,7 +92,11 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={() => onNavigateTab('feedback-points')}
+              onClick={() =>
+                onCreateFeedbackPoint
+                  ? onCreateFeedbackPoint()
+                  : onNavigateTab('feedback-points')
+              }
               className="w-full sm:w-auto px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-sm shadow-sm transition-colors flex items-center justify-center gap-2"
             >
               <QrCode className="w-4 h-4" />

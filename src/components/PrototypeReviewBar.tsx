@@ -9,7 +9,8 @@ import {
   RotateCcw, 
   ExternalLink,
   ShieldAlert,
-  Info
+  Info,
+  QrCode
 } from 'lucide-react';
 import { AppRoute, PrototypeScenario } from '../types';
 
@@ -79,6 +80,18 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
           </button>
 
           <button
+            onClick={() => onRouteChange('feedback-point-setup')}
+            className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+              currentRoute === 'feedback-point-setup'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Feedback Point Setup</span>
+          </button>
+
+          <button
             onClick={() => onRouteChange('feedback')}
             className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
               currentRoute === 'feedback'
@@ -115,6 +128,8 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             >
               <option value="multi-location">Multi-Location (Bubbles Café)</option>
               <option value="single-location">Single-Location SME (Corner Bistro)</option>
+              <option value="vera-beauty">Beauty & Personal Care (Vera Beauty)</option>
+              <option value="city-clinic">Healthcare & Clinic (City Clinic)</option>
               <option value="empty-state">New Organisation (Zero Data)</option>
             </select>
           </div>
