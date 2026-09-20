@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   QrCode,
   Sparkles,
@@ -44,12 +44,29 @@ interface OverviewViewProps {
   noEvidenceOverride?: boolean;
 }
 
-const PERIODS = [
-  { id: 'last-7', label: 'Last 7 days' },
-  { id: 'last-30', label: 'Last 30 days' },
-  { id: 'this-month', label: 'This month' },
-  { id: 'prev-month', label: 'Previous month' },
-];
+// Read-only period context for this experience-reference stage. The prototype
+// fixtures are not period-filtered, so no interactive selector is offered (it
+// would imply filtering that does not occur). This is deliberately structured
+// as a single source of truth so an authoritative period selector can replace
+// it once production read models provide period-specific evidence.
+const PERIOD_CONTEXT_LABEL = 'Last 30 days';
+
+// Parses fixture recency labels to an approximate age in minutes so the most
+// recent available timestamp can be identified. Returns null when a label
+// cannot be reliably ordered.
+function recencyMinutes(label: string | null | undefined): number | null {
+  if (!label) return null;
+  const l = label.trim().toLowerCase();
+  if (l === 'just now' || l === 'today') return 0;
+  if (l === 'yesterday') return 24 * 60;
+  const m = l.match(/^(\d+)\s*(min|mins|minute|minutes)\s+ago$/);
+  if (m) return Number(m[1]);
+  const h = l.match(/^(\d+)\s*(hour|hours|hr|hrs)\s+ago$/);
+  if (h) return Number(h[1]) * 60;
+  const d = l.match(/^(\d+)\s*(day|days)\s+ago$/);
+  if (d) return Number(d[1]) * 24 * 60;
+  return null;
+}
 
 // Overview: a calm operating picture of customer feedback. It presents
 // factual evidence only — no universal score, no benchmark, no causality, no
@@ -73,8 +90,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   showAttentionReference = false,
   noEvidenceOverride = false,
 }) => {
-  const [periodId, setPeriodId] = useState('last-30');
-  const periodLabel = PERIODS.find((p) => p.id === periodId)?.label || 'Last 30 days';
+  const periodLabel = PERIOD_CONTEXT_LABEL;
 
   const filteredEndpoints = currentScope === 'all'
     ? endpoints
@@ -93,8 +109,23 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     : filteredEndpoints.reduce((sum, ep) => sum + ep.totalResponses, 0);
   const activeEndpointsCount = filteredEndpoints.filter((e) => e.status === 'active').length;
   const locationsRepresented = new Set(filteredEndpoints.map((e) => e.locationId)).size;
-  const latestTimestamp =
-    filteredEndpoints.map((e) => e.lastResponseAt).find((t) => t) || null;
+
+  // Most recent available fixture timestamp in scope. Only claim "latest" when
+  // every candidate timestamp can be reliably ordered; otherwise fall back to
+  // a neutral recency line. Never shown when there is no evidence.
+  const recency = useMemo(() => {
+    const candidates = [
+      ...filteredEndpoints.map((e) => e.lastResponseAt),
+      ...filteredSessions.map((s) => s.timestamp),
+    ].filter((t): t is string => Boolean(t));
+    if (candidates.length === 0) return { kind: 'none' as const, label: null as string | null };
+    const parsed = candidates.map((label) => ({ label, minutes: recencyMinutes(label) }));
+    if (parsed.every((p) => p.minutes !== null)) {
+      const latest = parsed.reduce((a, b) => ((a.minutes as number) <= (b.minutes as number) ? a : b));
+      return { kind: 'latest' as const, label: latest.label };
+    }
+    return { kind: 'recent' as const, label: null };
+  }, [filteredEndpoints, filteredSessions]);
 
   const activeMeasureIds = Array.from(new Set(filteredEndpoints.flatMap((e) => e.activeMeasureIds)));
   const activeMeasures = measures.filter((m) => activeMeasureIds.includes(m.id));
@@ -115,6 +146,11 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   );
 
   const withComparison = measured.filter((m) => m.available && m.summary.total > 0);
+
+  // No-evidence override must be internally consistent: no comments shown.
+  const commentSessions = noEvidenceOverride
+    ? []
+    : filteredSessions.filter((s) => s.optionalComment);
 
   // EMPTY: no Feedback Points at all → first setup CTA (unchanged intent).
   if (endpoints.length === 0) {
@@ -175,23 +211,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             </div>
           </div>
 
-          {/* Period control */}
+          {/* Period context (read-only at this stage — not a filter control) */}
           <div className="shrink-0">
-            <label htmlFor="overview-period" className="sr-only">
-              Period
-            </label>
-            <select
-              id="overview-period"
-              value={periodId}
-              onChange={(e) => setPeriodId(e.target.value)}
-              className="w-full sm:w-auto bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-600/30"
-            >
-              {PERIODS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+            <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-xs font-semibold text-slate-700">{periodLabel}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -251,10 +276,16 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             <span>
               {locationsRepresented} Location{locationsRepresented === 1 ? '' : 's'} represented
             </span>
-            {latestTimestamp && (
+            {recency.kind === 'latest' && (
               <span className="inline-flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                Latest feedback {latestTimestamp}
+                Latest feedback {recency.label}
+              </span>
+            )}
+            {recency.kind === 'recent' && (
+              <span className="inline-flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                Recent feedback received
               </span>
             )}
           </div>
@@ -410,7 +441,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
 
           <div className="space-y-3">
-            {filteredSessions.filter((s) => s.optionalComment).slice(0, 4).map((session) => {
+            {commentSessions.slice(0, 4).map((session) => {
               const loc = locations.find((l) => l.id === session.locationId);
               const ep = endpoints.find((e) => e.id === session.endpointId);
               return (
@@ -432,9 +463,11 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               );
             })}
 
-            {filteredSessions.filter((s) => s.optionalComment).length === 0 && (
+            {commentSessions.length === 0 && (
               <div className="py-8 text-center text-xs text-slate-500">
-                No customer comments yet in this scope.
+                {noEvidenceOverride
+                  ? 'No customer comments yet.'
+                  : 'No customer comments yet in this scope.'}
               </div>
             )}
           </div>
@@ -457,6 +490,8 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                     <div className="text-[11px] text-slate-500 mt-0.5">
                       {ep.status === 'paused'
                         ? 'Paused'
+                        : noEvidenceOverride
+                        ? 'No responses yet'
                         : `${ep.totalResponses} response${ep.totalResponses === 1 ? '' : 's'}`}
                     </div>
                   </div>

@@ -92,13 +92,30 @@ check('no fake 0% favourable', !vera.includes('0%') || !vera.includes('0% favour
 // 5. Attention remains reference-only and off by default.
 check('attention not shown by default', !vera.includes('Needs Attention'));
 
-// 6. No-evidence state.
+// 6. Period context is read-only (no filter control that implies filtering).
+check('period context shown as read-only label', vera.includes('Last 30 days'));
+check('period has no interactive selector', !vera.includes('<select'));
+check('period does not offer unfiltered options', !vera.includes('Last 7 days'));
+
+// 7. Latest feedback is the most recent reliably-ordered fixture timestamp.
+check('latest feedback reflects the most recent timestamp', vera.includes('Latest feedback 2 hours ago'));
+
+// 8. No-evidence state is internally consistent.
 const noEvidence = render({ noEvidenceOverride: true });
 check('no-evidence state heading', noEvidence.includes('Waiting for your first feedback'));
 check('no-evidence offers View Feedback Points', noEvidence.includes('View Feedback Points'));
 check('no-evidence does not show favourable %', !noEvidence.includes('% favourable'));
+check('no-evidence shows no signal results', !noEvidence.includes('No feedback yet') || !noEvidence.includes('favourable'));
+check('no-evidence shows no recent comments', !noEvidence.includes('braids'));
+check('no-evidence shows no movement', !noEvidence.includes('vs previous period'));
+check(
+  'no-evidence feedback points do not show counts',
+  !noEvidence.includes('14 responses') && !noEvidence.includes('7 responses')
+);
+check('no-evidence feedback points remain listed as Active', noEvidence.includes('Active'));
+check('no-evidence shows No responses yet', noEvidence.includes('No responses yet'));
 
-// 7. City Clinic — limited evidence (descriptive, no valid comparison).
+// 9. City Clinic — limited evidence (descriptive, no valid comparison).
 const clinic = render({
   organisationName: 'City Clinic',
   currentScope: 'loc-clinic-main',
@@ -111,7 +128,7 @@ const clinic = render({
 check('limited evidence shows descriptive result', clinic.includes('83%'));
 check('limited evidence has no valid movement', !clinic.includes('vs previous period'));
 
-// 8. Organisation scope vs Location scope (Bubbles Café).
+// 10. Organisation scope vs Location scope (Bubbles Café).
 const orgScope = render({
   organisationName: 'Bubbles Café',
   currentScope: 'all',
