@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "test:participant": "tsx scripts/participant-smoke.tsx",
     "test:overview": "tsx scripts/overview-smoke.tsx",
-    "test:locations-activity": "tsx scripts/locations-activity-smoke.tsx"
+    "test:locations-activity": "tsx scripts/locations-activity-smoke.tsx",
+    "test:product-ops": "tsx scripts/product-ops-smoke.tsx"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
