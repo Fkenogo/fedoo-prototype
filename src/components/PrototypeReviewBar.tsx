@@ -39,6 +39,9 @@ interface PrototypeReviewBarProps {
   // Pass 5 overview review tooling: force the no-evidence state.
   overviewNoEvidence?: boolean;
   onToggleOverviewNoEvidence?: () => void;
+  // Pass 6 activity review tooling: force the no-activity state.
+  activityEmpty?: boolean;
+  onToggleActivityEmpty?: () => void;
 }
 
 export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
@@ -62,6 +65,8 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
   onToggleParticipantUnavailable,
   overviewNoEvidence = false,
   onToggleOverviewNoEvidence,
+  activityEmpty = false,
+  onToggleActivityEmpty,
 }) => {
   return (
     <aside aria-label="Prototype Evaluation Panel (reference only — not production)" className="bg-slate-950 text-white border-b border-slate-800 text-xs py-2 px-3 sm:px-6 sticky top-0 z-50 shadow-md">
@@ -250,6 +255,17 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
                 }`}
               >
                 Evidence: {overviewNoEvidence ? 'none' : 'normal'}
+              </button>
+              <button
+                onClick={onToggleActivityEmpty}
+                title="Force the Customer Activity no-activity experience state (review tooling)"
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-colors ${
+                  activityEmpty
+                    ? 'bg-sky-500/20 text-sky-300 border-sky-500/50'
+                    : 'text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                Activity: {activityEmpty ? 'empty' : 'normal'}
               </button>
               <button
                 onClick={onToggleAttentionReference}

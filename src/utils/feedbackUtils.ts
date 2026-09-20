@@ -63,6 +63,54 @@ export function comparisonAvailable(signal?: ServiceSignal): boolean {
   return Boolean(m && m.direction !== 'unavailable' && m.deltaPoints !== undefined);
 }
 
+// Parses fixture recency labels to an approximate age in minutes so the most
+// recent timestamp can be identified. Returns null when a label cannot be
+// reliably ordered.
+export function recencyMinutes(label?: string | null): number | null {
+  if (!label) return null;
+  const l = label.trim().toLowerCase();
+  if (l === 'just now' || l === 'today') return 0;
+  if (l === 'yesterday') return 24 * 60;
+  const m = l.match(/^(\d+)\s*(min|mins|minute|minutes)\s+ago$/);
+  if (m) return Number(m[1]);
+  const h = l.match(/^(\d+)\s*(hour|hours|hr|hrs)\s+ago$/);
+  if (h) return Number(h[1]) * 60;
+  const d = l.match(/^(\d+)\s*(day|days)\s+ago$/);
+  if (d) return Number(d[1]) * 24 * 60;
+  return null;
+}
+
+// User-facing channel labels. Channel is access context only.
+export const CHANNEL_LABELS: Record<string, string> = {
+  qr: 'QR',
+  link: 'Web link',
+  whatsapp: 'WhatsApp',
+  sms: 'SMS',
+};
+
+export function channelLabel(channel?: string): string {
+  if (!channel) return '';
+  return CHANNEL_LABELS[channel] || channel;
+}
+
+// Resolves the most recent reliably-ordered timestamp from a set of labels.
+// Returns kind 'latest' with the label only when every candidate parses;
+// 'recent' when ordering cannot be trusted; 'none' when there are no labels.
+export function resolveRecency(
+  labels: (string | null | undefined)[]
+): { kind: 'latest' | 'recent' | 'none'; label: string | null } {
+  const candidates = labels.filter((t): t is string => Boolean(t));
+  if (candidates.length === 0) return { kind: 'none', label: null };
+  const parsed = candidates.map((label) => ({ label, minutes: recencyMinutes(label) }));
+  if (parsed.every((p) => p.minutes !== null)) {
+    const latest = parsed.reduce((a, b) =>
+      (a.minutes as number) <= (b.minutes as number) ? a : b
+    );
+    return { kind: 'latest', label: latest.label };
+  }
+  return { kind: 'recent', label: null };
+}
+
 /**
  * [PROTOTYPE ASSUMPTION ANNOTATION — Product Truth realignment]:
  * This client helper SIMULATES how a newly recorded customer feedback session
