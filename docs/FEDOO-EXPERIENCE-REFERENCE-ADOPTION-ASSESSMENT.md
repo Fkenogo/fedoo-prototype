@@ -1,6 +1,7 @@
 # FEDOO Experience Reference — Adoption Assessment
 
 - Prototype entry SHA: `bc49dae6207baaad1af1e569ac892bfabfda0cdc`
+- Operator Console completion pass entry SHA: `c5028af02f8913db9853abcfb4c3ed19e0781ca5` (branch `review/whole-prototype-acceptance-001`)
 - Fedoo Product Truth baseline: `acb054a1fc6bb5501fe123f988d55e77f1a71ea3` (origin/main, read-only authority — not changed)
 - Branch: `feat/product-truth-experience-realignment`
 - Date (UTC): 2026-09-18
@@ -177,3 +178,73 @@ Founder approval was recorded on 18 September 2026 against reviewed prototype he
 The approved Experience Reference now governs production experience assembly, while governed Product
 Truth (EA-01→EA-06 and subsequent approved authorities) remains controlling for domain semantics,
 security, integrity, permissions, lifecycle and authoritative analytical meaning.
+
+## FEDOO OPERATOR CONSOLE — EXPERIENCE COMPLETION ASSESSMENT
+
+Completion pass entry: `c5028af02f8913db9853abcfb4c3ed19e0781ca5` on `review/whole-prototype-acceptance-001`.
+The new Operator Console wraps the retained Product Operations workspace in a human operating
+console. All new operational records, health indicators and mutations are illustrative local
+prototype state. No backend service, production authority or Product Truth is created by this UI.
+
+### Existing Product Operations retained
+
+Measure Library, Instruments, Languages, Sector & Context Mapping, Recommendations & Templates,
+Product Change History and Product Diagnostics remain available under **Product**. Existing
+catalogue interactions remain in place; Product Change History and Product Diagnostics are
+separate from platform Audit and Platform Health. The product lifecycle remains an experience
+reference; normal governed catalogue use has no Organisation approval queue.
+
+### New operational domains
+
+The console adds Overview; Organisations with search/filter, detail fixture, suspend/reactivate,
+onboarding/location/member/entitlement summaries and read-only Support view; Users & Access with
+invitation/access support examples; Subscriptions & Entitlements with capability states and a
+custom-question pilot toggle; Feedback Operations with a QR support walkthrough and immutable
+response boundary; Platform Health; platform Audit; and controlled Settings placeholders.
+Material demo mutations append visible session-local audit items. Support view is read-only and is
+not impersonation. The role selector illustrates five possible operator roles and does not define
+a permission matrix.
+
+### Product Truth alignment and integrity boundaries
+
+The prototype describes governed Standard Questions, exactly five selected governed questions,
+advisory recommendations, custom questions as separate from Measure Evidence/Signal/History,
+persistent Feedback Point identity, anonymous participant defaults, and factual Activity. It does
+not offer response editing, participant identification, historic composition/evidence rewriting,
+retroactive recalculation or silent question wording changes. No analytical Attention semantics,
+causality, benchmarks, rankings or opaque scores are introduced. Prototype counts and telemetry
+are examples only and must not be treated as live facts.
+
+### Readiness and dependencies
+
+| Classification | Areas |
+|---|---|
+| OPERATIONAL NOW | Existing prototype Product catalogue interactions and the Organisation App/Participant experience in this prototype only. This classification does not assert production console services. |
+| BACKEND REQUIRED | Live Organisation/member/location/Feedback Point read models; invitation delivery; access/membership mutations; entitlement persistence/enforcement; participant request/submission telemetry; operational exceptions; health/edge/background/migration telemetry; durable append-only platform audit; notification and integration settings. |
+| PRODUCT DECISION REQUIRED | Operator authentication and authority model; final role permissions; entitlement semantics/effective-date precedence and override authority; support escalation ownership; operational exception taxonomy and thresholds. |
+| DEFERRED | Custom-question subscription enforcement; selecting an authentication provider; true impersonation; secrets or arbitrary database administration; modifying participant responses or historic evidence. |
+
+### Unresolved decisions and adoption boundary
+
+Product/Security authority must define who may suspend/reactivate Organisations, change memberships,
+grant overrides, inspect support data, resolve exceptions and publish governed Product changes.
+Commercial authority must define entitlement semantics; there are intentionally no plan names, prices,
+limits or payment-provider assumptions here. Provider-specific authentication and notification
+behavior remains a placeholder until selected. Operators are domain-action users, not database
+administrators. The prototype role model and audit log are reference-only; production permission
+enforcement and immutable audit storage require backend/security work.
+
+The console layout, object hierarchy, search/filter patterns, factual status language, read-only
+support view and explicit capability classifications are ready for review/adoption as experience
+patterns. Simulated operational actions, fixtures, health signals, permissions and audit behavior
+are reference-only. Any authority, provider behavior, commercial policy or data access beyond
+established Product Truth requires future Product/Security/Commercial authority.
+
+### Scenarios and validation
+
+Fixtures cover normal multi-Organisation operations, partial onboarding (Mwezi Market), pending owner
+invitation (The Corner Bistro), QR/link support inspection, a custom-question pilot entitlement,
+degraded illustrative edge delivery and Product drafts/review state. Desktop-first layouts collapse
+navigation and card grids for narrow screens; narrow-screen browser/device validation remains to be
+performed before adoption. Build/lint outcomes are recorded with this completion pass rather than
+implied by these fixtures.

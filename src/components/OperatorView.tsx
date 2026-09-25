@@ -1,207 +1,62 @@
-import React, { useState } from 'react';
-import {
-  ShieldCheck,
-  LayoutDashboard,
-  BookOpen,
-  FlaskConical,
-  Languages as LanguagesIcon,
-  Compass,
-  GitBranch,
-  History as HistoryIcon,
-  Stethoscope,
-  ArrowLeft,
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Activity, Building2, ChevronRight, CircleHelp, ClipboardList, Cog, FlaskConical, HeartPulse, Search, ShieldCheck, Users, WalletCards } from 'lucide-react';
 import { Measure } from '../types';
 import { buildProductOpsModel, OpsDraft } from '../data/productOpsData';
-import {
-  OpsOverview,
-  MeasureLibrary,
-  InstrumentsWorkspace,
-  LanguagesWorkspace,
-  SectorMapping,
-  RecommendationsTemplates,
-  ChangeHistory,
-  Diagnostics,
-  OpsSection,
-} from './operator/OpsSections';
+import { OpsOverview, MeasureLibrary, InstrumentsWorkspace, LanguagesWorkspace, SectorMapping, RecommendationsTemplates, ChangeHistory, Diagnostics, OpsSection } from './operator/OpsSections';
 
-interface OperatorViewProps {
-  measures: Measure[];
-  onReturnToApp: () => void;
-}
-
-const NAV: { id: OpsSection; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'measure-library', label: 'Measure Library', icon: BookOpen },
-  { id: 'instruments', label: 'Instruments', icon: FlaskConical },
-  { id: 'languages', label: 'Languages', icon: LanguagesIcon },
-  { id: 'sector-mapping', label: 'Sector & Context Mapping', icon: Compass },
-  { id: 'recommendations', label: 'Recommendations & Templates', icon: GitBranch },
-  { id: 'history', label: 'Change History', icon: HistoryIcon },
-  { id: 'diagnostics', label: 'Diagnostics', icon: Stethoscope },
+type Area = 'Overview'|'Organisations'|'Users & Access'|'Subscriptions & Entitlements'|'Feedback Operations'|'Product'|'Platform Health'|'Audit'|'Settings';
+type Org = {name:string; sector:string; locations:number; points:number; members:number; entitlement:string; onboarding:string; status:string; created:string};
+type Audit = {time:string; operator:string; action:string; target:string; previous:string; result:string; note:string; source:string};
+const initialOrgs: Org[] = [
+ {name:'Bubbles Café',sector:'Café',locations:3,points:4,members:6,entitlement:'Pilot entitlement',onboarding:'Complete',status:'Active',created:'12 Aug 2026'},
+ {name:'Vera Beauty',sector:'Beauty',locations:1,points:1,members:2,entitlement:'Pilot entitlement',onboarding:'In progress',status:'Active',created:'02 Sep 2026'},
+ {name:'City Clinic',sector:'Healthcare',locations:2,points:2,members:5,entitlement:'Enabled',onboarding:'Complete',status:'Active',created:'29 Jul 2026'},
+ {name:'The Corner Bistro',sector:'Restaurant',locations:1,points:1,members:1,entitlement:'Trial',onboarding:'Invitation pending',status:'Active',created:'18 Sep 2026'},
+ {name:'Mwezi Market',sector:'Retail',locations:2,points:0,members:3,entitlement:'Product decision required',onboarding:'Partially complete',status:'Active',created:'21 Sep 2026'},
 ];
+const seedAudit: Audit[] = [{time:'Today, 09:42',operator:'Aline N. · Support Operator',action:'Resent invitation',target:'owner@cornerbistro.example',previous:'Invitation pending',result:'Resend requested (simulation)',note:'Owner reported access issue',source:'Operator'}];
+const nav: {name:Area; icon:React.ComponentType<{className?:string}>}[] = [
+ {name:'Overview',icon:Activity},{name:'Organisations',icon:Building2},{name:'Users & Access',icon:Users},{name:'Subscriptions & Entitlements',icon:WalletCards},{name:'Feedback Operations',icon:ClipboardList},{name:'Product',icon:FlaskConical},{name:'Platform Health',icon:HeartPulse},{name:'Audit',icon:ShieldCheck},{name:'Settings',icon:Cog},
+];
+const Capability = ({state}:{state:string}) => <span className="inline-flex rounded-full border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-600">{state}</span>;
 
-// Fedoo Product Operations — the internal control plane used to curate and
-// maintain the governed product. Organisations operate within already-published
-// capability; there is no Organisation approval queue here. Prototype
-// mutations are experience-only and never touch Organisation session/history.
-export const OperatorView: React.FC<OperatorViewProps> = ({ measures, onReturnToApp }) => {
-  const [model, setModel] = useState(() => buildProductOpsModel(measures));
-  const [activeSection, setActiveSection] = useState<OpsSection>('overview');
-
-  const onCreateDraft = (draft: OpsDraft) =>
-    setModel((prev) => ({ ...prev, drafts: [draft, ...prev.drafts] }));
-
-  const onAdvanceDraft = (id: string) =>
-    setModel((prev) => ({
-      ...prev,
-      drafts: prev.drafts.map((d) =>
-        d.id === id
-          ? { ...d, state: d.state === 'Draft' ? 'Review' : 'Published', updated: 'Just now' }
-          : d
-      ),
-    }));
-
-  const onUpdateDraftBody = (id: string, body: string) =>
-    setModel((prev) => ({
-      ...prev,
-      drafts: prev.drafts.map((d) => (d.id === id ? { ...d, body } : d)),
-    }));
-
-  const onToggleDiagnostic = (id: string) =>
-    setModel((prev) => ({
-      ...prev,
-      diagnostics: prev.diagnostics.map((d) =>
-        d.id === id ? { ...d, resolved: !d.resolved } : d
-      ),
-    }));
-
-  const onToggleDescriptor = (id: string) =>
-    setModel((prev) => ({
-      ...prev,
-      descriptors: prev.descriptors.map((d) =>
-        d.id === id ? { ...d, reviewed: !d.reviewed } : d
-      ),
-    }));
-
-  const onToggleRecommendationMeasure = (
-    mapId: string,
-    measureId: string,
-    kind: 'recommended' | 'alsoRelevant'
-  ) =>
-    setModel((prev) => ({
-      ...prev,
-      recommendations: prev.recommendations.map((rec) => {
-        if (rec.id !== mapId) return rec;
-        const list = rec[kind];
-        const next = list.includes(measureId)
-          ? list.filter((x) => x !== measureId)
-          : [...list, measureId];
-        return { ...rec, [kind]: next };
-      }),
-    }));
-
-  const sectionProps = {
-    model,
-    onNavigate: setActiveSection,
-    onCreateDraft,
-    onAdvanceDraft,
-    onUpdateDraftBody,
-    onToggleDiagnostic,
-    onToggleDescriptor,
-    onToggleRecommendationMeasure,
-  };
-
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'overview':
-        return <OpsOverview {...sectionProps} />;
-      case 'measure-library':
-        return <MeasureLibrary {...sectionProps} />;
-      case 'instruments':
-        return <InstrumentsWorkspace {...sectionProps} />;
-      case 'languages':
-        return <LanguagesWorkspace {...sectionProps} />;
-      case 'sector-mapping':
-        return <SectorMapping {...sectionProps} />;
-      case 'recommendations':
-        return <RecommendationsTemplates {...sectionProps} />;
-      case 'history':
-        return <ChangeHistory {...sectionProps} />;
-      case 'diagnostics':
-        return <Diagnostics {...sectionProps} />;
-      default:
-        return <OpsOverview {...sectionProps} />;
-    }
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-5 pb-20">
-      {/* Operator shell top bar */}
-      <div className="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold tracking-tight">Fedoo Product Operations</h1>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-900/60 text-cyan-300 border border-cyan-700/50">
-                  Internal control plane — prototype
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Curate the governed catalogue centrally. Organisations use published capability
-                directly — no approval queue.
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={onReturnToApp}
-            className="self-start sm:self-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Organisation View</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Section navigation */}
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-800 p-1.5 overflow-x-auto">
-        <nav className="flex items-center gap-1 min-w-max" aria-label="Product Operations sections">
-          {NAV.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                aria-current={isActive ? 'page' : undefined}
-                className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-                  isActive
-                    ? 'bg-cyan-600 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Workspace */}
-      <div className="bg-slate-50 rounded-3xl border border-slate-200 p-4 sm:p-6">
-        {renderSection()}
-      </div>
-
-      <p className="text-[10px] text-slate-400 text-center">
-        Prototype experience reference. Operational states, mappings, drafts and diagnostics are
-        illustrative and do not define Product Truth.
-      </p>
-    </div>
-  );
+interface Props { measures: Measure[]; onReturnToApp: () => void }
+export const OperatorView: React.FC<Props> = ({ measures, onReturnToApp }) => {
+ const [model,setModel]=useState(()=>buildProductOpsModel(measures));
+ const [area,setArea]=useState<Area>('Overview');
+ const [productSection,setProductSection]=useState<OpsSection>('overview');
+ const [orgs,setOrgs]=useState(initialOrgs);
+ const [selectedOrg,setSelectedOrg]=useState('Bubbles Café');
+ const [query,setQuery]=useState(''); const [filter,setFilter]=useState('All');
+ const [audit,setAudit]=useState(seedAudit);
+ const [customEnabled,setCustomEnabled]=useState(true);
+ const [role,setRole]=useState('Support Operator');
+ const [notice,setNotice]=useState('');
+ const record=(action:string,target:string,previous:string,result:string,note='Operator support action')=>{
+   setAudit(a=>[{time:'Just now',operator:'Aline N. · '+role,action,target,previous,result,note,source:'Operator'},...a]);
+   setNotice(`${action} recorded in prototype audit.`);
+ };
+ const selected=orgs.find(o=>o.name===selectedOrg)||orgs[0];
+ const filtered=useMemo(()=>orgs.filter(o=>(filter==='All'||o.status===filter||o.sector===filter||o.onboarding===filter)&&`${o.name} ${o.sector}`.toLowerCase().includes(query.toLowerCase())),[orgs,filter,query]);
+ const createDraft=(d:OpsDraft)=>setModel(m=>({...m,drafts:[d,...m.drafts]}));
+ const advanceDraft=(id:string)=>setModel(m=>({...m,drafts:m.drafts.map(d=>d.id===id?{...d,state:d.state==='Draft'?'Review':'Published',updated:'Just now'}:d)}));
+ const updateDraft=(id:string,body:string)=>setModel(m=>({...m,drafts:m.drafts.map(d=>d.id===id?{...d,body}:d)}));
+ const toggleDiagnostic=(id:string)=>setModel(m=>({...m,diagnostics:m.diagnostics.map(d=>d.id===id?{...d,resolved:!d.resolved}:d)}));
+ const toggleDescriptor=(id:string)=>setModel(m=>({...m,descriptors:m.descriptors.map(d=>d.id===id?{...d,reviewed:!d.reviewed}:d)}));
+ const toggleRecommendation=(mapId:string,measureId:string,kind:'recommended'|'alsoRelevant')=>setModel(m=>({...m,recommendations:m.recommendations.map(r=>r.id!==mapId?r:{...r,[kind]:r[kind].includes(measureId)?r[kind].filter(x=>x!==measureId):[...r[kind],measureId]})}));
+ const updateOrg=(name:string,fn:(o:Org)=>Org,action:string,prev:string,next:string)=>{setOrgs(xs=>xs.map(o=>o.name===name?fn(o):o));record(action,name,prev,next);};
+ const sectionProps={model,onNavigate:setProductSection,onCreateDraft:createDraft,onAdvanceDraft:advanceDraft,onUpdateDraftBody:updateDraft,onToggleDiagnostic:toggleDiagnostic,onToggleDescriptor:toggleDescriptor,onToggleRecommendationMeasure:toggleRecommendation};
+ const product=()=>{switch(productSection){case'measure-library':return <MeasureLibrary {...sectionProps}/>;case'instruments':return <InstrumentsWorkspace {...sectionProps}/>;case'languages':return <LanguagesWorkspace {...sectionProps}/>;case'sector-mapping':return <SectorMapping {...sectionProps}/>;case'recommendations':return <RecommendationsTemplates {...sectionProps}/>;case'history':return <ChangeHistory {...sectionProps}/>;case'diagnostics':return <Diagnostics {...sectionProps}/>;default:return <OpsOverview {...sectionProps}/>;}};
+ const card=(title:string,value:string,sub:string)=><div key={title} className="rounded-2xl border border-slate-200 bg-white p-4"><div className="text-xs text-slate-500">{title}</div><div className="mt-1 text-2xl font-bold text-slate-900">{value}</div><div className="mt-1 text-[11px] text-slate-500">{sub}</div></div>;
+ const tableOrgs=()=> <><div className="flex flex-col sm:flex-row gap-2"><label className="relative flex-1"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400"/><input aria-label="Search Organisations" className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm" placeholder="Search Organisations or sector" value={query} onChange={e=>setQuery(e.target.value)}/></label><select aria-label="Organisation status filter" className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" value={filter} onChange={e=>setFilter(e.target.value)}><option>All</option><option>Active</option><option>Suspended</option><option>Partially complete</option><option>Invitation pending</option><option>Café</option><option>Beauty</option><option>Healthcare</option><option>Restaurant</option><option>Retail</option></select></div><div className="mt-4 grid lg:grid-cols-[1.1fr_.9fr] gap-4"><div className="space-y-2">{filtered.map(o=><button key={o.name} onClick={()=>setSelectedOrg(o.name)} className={`w-full text-left rounded-xl border p-3 ${selectedOrg===o.name?'border-cyan-500 bg-cyan-50':'border-slate-200 bg-white'}`}><div className="flex justify-between gap-2"><b className="text-sm">{o.name}</b><span className="text-xs text-slate-500">{o.status}</span></div><div className="mt-1 text-xs text-slate-500">{o.sector} · {o.locations} locations · onboarding {o.onboarding}</div></button>)}</div><div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="flex items-start justify-between"><div><h3 className="font-bold">{selected.name}</h3><p className="text-xs text-slate-500">{selected.sector} · created {selected.created}</p></div><Capability state={selected.status}/></div><div className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><b>{selected.locations}</b><div className="text-slate-500">Locations</div></div><div><b>{selected.points}</b><div className="text-slate-500">Feedback Points</div></div><div><b>{selected.members}</b><div className="text-slate-500">Members</div></div><div><b>{selected.entitlement}</b><div className="text-slate-500">Entitlement</div></div><div className="col-span-2"><b>{selected.onboarding}</b><div className="text-slate-500">Onboarding · recent activity: configuration viewed today</div></div></div><div className="mt-4 flex flex-wrap gap-2"><button className="operator-action" onClick={()=>updateOrg(selected.name,o=>({...o,status:o.status==='Suspended'?'Active':'Suspended'}),selected.status==='Suspended'?'Reactivated Organisation':'Suspended Organisation',selected.status,selected.status==='Suspended'?'Active':'Suspended')}>{selected.status==='Suspended'?'Reactivate':'Suspend'}</button><button className="operator-action" onClick={()=>{setArea('Feedback Operations');setNotice(`Support view opened for ${selected.name}: read-only, not impersonation.`)}}>Support view · read-only</button><button className="operator-action" onClick={()=>setArea('Audit')}>Audit history</button></div><div className="mt-4 border-t pt-3 grid sm:grid-cols-3 gap-3 text-[11px]"><div><b>Locations</b><p className="mt-1 text-slate-500">{selected.name==='Bubbles Café'?'Main Branch · City Centre · Airport':'Primary location'} · inspect requires backend</p></div><div><b>Feedback Points</b><p className="mt-1 text-slate-500">{selected.name==='Bubbles Café'?'Table QR Stands · Takeaway Counter · Concourse Seating · CBD Dine-In':'Primary Feedback Point'} · inspect in Feedback Operations</p></div><div><b>Members</b><p className="mt-1 text-slate-500">{selected.name==='The Corner Bistro'?'Maya Niyonkuru · Owner · invitation pending':'Organisation owner · members fixture'} · manage in Users & Access</p></div></div><p className="mt-3 text-[10px] text-slate-400">Location/member/Feedback Point details are illustrative fixtures. Backend required for live inspection.</p></div></div></>;
+ const users=()=> <><input aria-label="Search users" className="w-full sm:w-96 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Search name, email, Organisation" value={query} onChange={e=>setQuery(e.target.value)}/><div className="mt-4 space-y-2">{[{name:'Maya Niyonkuru',email:'owner@cornerbistro.example',org:'The Corner Bistro',role:'Organisation Owner',inv:'Invitation pending',status:'Enabled'},{name:'Aline N.',email:'aline@fedoo.example',org:'Fedoo',role:role,inv:'Accepted',status:'Enabled'},{name:'Jean Uwimana',email:'jean@bubbles.example',org:'Bubbles Café',role:'Organisation Manager',inv:'Accepted',status:'Enabled'}].filter(u=>`${u.name} ${u.email} ${u.org}`.toLowerCase().includes(query.toLowerCase())).map(u=><div key={u.email} className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><b className="text-sm">{u.name}</b><div className="text-xs text-slate-500">{u.email} · {u.org} · {u.role}</div><div className="text-xs mt-1">Provider authentication: <span className="text-slate-500">not connected to provider</span> · Fedoo access: {u.status} · {u.inv}</div></div><div className="flex gap-2"><button className="operator-action" onClick={()=>record('Resent invitation',u.email,u.inv,'Resend requested (simulation)')}>Resend invitation</button><button className="operator-action" onClick={()=>record(u.status==='Enabled'?'Disabled Fedoo access':'Restored Fedoo access',u.email,u.status,u.status==='Enabled'?'Disabled':'Enabled')}>{u.status==='Enabled'?'Disable access':'Restore access'}</button></div></div>)}</div><p className="mt-3 text-xs text-slate-500">Authentication provider: Can this person authenticate? Fedoo: what Organisations, roles and capabilities apply? Provider selection and live membership changes require backend/provider integration.</p></>;
+ const entitlements=()=> <><div className="grid sm:grid-cols-3 gap-3">{card('Subscription state',selected.entitlement,'Plan and payment provider not selected')}{card('Organisation',selected.name,'Effective capability view')}{card('Custom open-ended question',customEnabled?'Pilot entitlement':'Disabled','Separate from Measure Evidence, Signal and History')}</div><div className="mt-4 rounded-2xl border border-slate-200 bg-white overflow-hidden"><div className="p-4 border-b"><b>Capabilities · {selected.name}</b><p className="text-xs text-slate-500">What this Organisation may use, and why. Illustrative prototype state.</p></div>{[['Standard Questions','Enabled'],['Feedback Points','Enabled'],['Custom open-ended question',customEnabled?'Pilot entitlement':'Disabled'],['Multiple locations','Enabled'],['API access','Not yet implemented'],['Future capabilities','Product decision required']].map(([n,s])=><div key={n} className="flex justify-between p-3 border-b last:border-0 text-sm"><span>{n}</span><Capability state={s}/></div>)}</div><button className="btn mt-3" onClick={()=>{setCustomEnabled(x=>!x);record(customEnabled?'Removed custom-question pilot entitlement':'Granted custom-question pilot entitlement',selected.name,customEnabled?'Pilot entitlement':'Disabled',customEnabled?'Disabled':'Pilot entitlement','Prototype entitlement demonstration; production enforcement deferred')}}>{customEnabled?'Remove':'Grant'} custom-question pilot entitlement</button><p className="mt-3 text-xs text-slate-500">No plan names, prices or limits are defined. Custom-question subscription enforcement is deferred; toggles simulate operator intent only.</p></>;
+ const feedback=()=> <><div className="flex gap-2 flex-col sm:flex-row"><input aria-label="Search Feedback Points" className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Search Organisation, Location, Feedback Point" value={query} onChange={e=>setQuery(e.target.value)}/><Capability state="Simulation"/></div><div className="mt-4 grid lg:grid-cols-[1fr_1fr] gap-4"><div className="rounded-2xl border bg-white p-4"><h3 className="font-bold">Bubbles Café · Downtown · Counter feedback</h3><p className="text-xs text-slate-500 mt-1">Feedback Point · Active · public participant access available · QR configured</p><div className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><b>Current configuration</b><p className="text-slate-500">Five governed questions selected</p></div><div><b>Custom question</b><p className="text-slate-500">Not configured</p></div><div><b>Participant URL</b><p className="text-slate-500 break-all">feedback.fedoo.example/p/bub-cafe-01</p></div><div><b>Recent requests</b><p className="text-slate-500">8 successful requests · 0 failures (illustrative)</p></div><div><b>Recent submitted sessions</b><p className="text-slate-500">6 today · last successful 10:14</p></div><div><b>Configuration history</b><p className="text-slate-500">Updated 18 Sep · prior composition retained</p></div></div><p className="mt-4 text-xs text-amber-700">Participant responses are not editable. Historic session composition and evidence remain immutable.</p></div><div className="rounded-2xl border bg-white p-4"><h3 className="font-bold">Support scenario · “My QR code is not working.”</h3><ol className="mt-3 list-decimal pl-4 space-y-2 text-xs text-slate-600"><li>Confirm Feedback Point is active.</li><li>Check public access state and configured URL.</li><li>Review recent participant request and submission facts.</li><li>Inspect configuration history; escalate endpoint failures.</li></ol><div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs">Current fixture: Active · access exists · URL configured · requests succeeding · submissions reaching Fedoo.</div><button className="btn mt-3" onClick={()=>record('Inspected Feedback Point','Bubbles Café / Downtown / Counter feedback','Not inspected','Inspection recorded')}>Record inspection in audit</button></div></div></>;
+ const overview=()=> <><div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">{card('Organisations','5','4 active · 1 onboarding · 0 suspended')}{card('Feedback Points','8','7 active · 1 inactive · 2 recent config changes')}{card('Feedback activity','24','submitted sessions today · 19 recent successful participant requests')}{card('Users & access','2','1 pending invitation · 1 access issue · 0 disabled accounts')}{card('Entitlements','4','active · 2 pilot/trial · 1 exception')}{card('Platform health','5 / 6','illustrative components healthy · edge delivery degraded')}{card('Exceptions','3','2 support · 1 platform dependency · unresolved')}{card('Product','1','draft/review change · 1 catalogue diagnostic')}{card('Readiness','Prototype','No live backend operator operations connected')}</div><div className="mt-4 grid lg:grid-cols-2 gap-4"><div className="rounded-2xl border bg-white p-4"><h3 className="font-bold">Needs operator attention</h3>{['The Corner Bistro owner invitation pending','Mwezi Market onboarding partially complete','Delivery / edge dependency degraded — illustrative'].map(t=><div key={t} className="border-t py-3 text-sm flex justify-between">{t}<button className="text-cyan-700 text-xs font-bold" onClick={()=>setArea(t.includes('invitation')?'Users & Access':t.includes('onboarding')?'Organisations':'Platform Health')}>Inspect ›</button></div>)}</div><div className="rounded-2xl border bg-white p-4"><h3 className="font-bold">Operator role model</h3><p className="text-xs text-slate-500 mt-1">Prototype role model — final permissions require Product/Security authority.</p><select className="mt-3 border rounded-lg px-3 py-2 text-sm" value={role} onChange={e=>setRole(e.target.value)}>{['Platform Administrator','Support Operator','Product Operator','Commercial Operator','Read-only Auditor'].map(x=><option key={x}>{x}</option>)}</select><div className="mt-3 text-xs text-slate-600">Current prototype operator: {role}. Areas and actions show permission boundaries conceptually; no production permission matrix is asserted.</div></div></div></>;
+ const health=()=> <><div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">{[['Runtime / application','Healthy · illustrative'],['Database connectivity','Backend integration required'],['Authentication provider','Provider not selected'],['Participant endpoint','Healthy · simulation'],['Delivery / edge','Degraded · illustrative'],['Background processing','Backend integration required'],['Migrations / schema','Not connected'],['External integrations','Not configured'],['Capacity indicators','Not connected']].map(([a,b])=><div key={a} className="rounded-xl bg-white border p-4"><b className="text-sm">{a}</b><div className="mt-2"><Capability state={b}/></div></div>)}</div><div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">Recent operational failures: Edge delivery dependency returned intermittent errors in simulation. No live telemetry or formal uptime/SLA guarantee is represented.</div></>;
+ const settings=()=> <><p className="text-sm text-slate-600">Controlled platform configuration placeholders. This screen does not expose secrets, credentials or arbitrary database settings.</p><div className="mt-4 grid sm:grid-cols-2 gap-3">{[['Platform identity & support','Fedoo · support contact placeholder'],['Operational defaults','Not configured'],['Enabled platform capabilities','Question sets · Feedback Points (illustrative)'],['Authentication integration','Provider selection pending'],['Notification configuration','Backend required'],['Delivery & infrastructure','Visibility placeholder']].map(([a,b])=><div key={a} className="bg-white border rounded-xl p-4"><b>{a}</b><p className="text-xs text-slate-500 mt-1">{b}</p><Capability state="Backend Required"/></div>)}</div></>;
+ const auditView=()=> <div className="overflow-x-auto rounded-xl border bg-white"><table className="w-full text-left text-xs"><thead className="bg-slate-100"><tr>{['Timestamp','Operator','Action','Target','Previous state','Resulting state','Reason / note','Source'].map(x=><th key={x} className="p-3 whitespace-nowrap">{x}</th>)}</tr></thead><tbody>{audit.map((a,i)=><tr key={i} className="border-t"><td className="p-3 whitespace-nowrap">{a.time}</td><td className="p-3 whitespace-nowrap">{a.operator}</td><td className="p-3">{a.action}</td><td className="p-3">{a.target}</td><td className="p-3">{a.previous}</td><td className="p-3">{a.result}</td><td className="p-3">{a.note}</td><td className="p-3">{a.source}</td></tr>)}</tbody></table><p className="p-3 text-xs text-slate-500">Prototype history behaves as append-only for this session. Production immutable audit storage is not implemented.</p></div>;
+ const usersView=users;
+ const render=()=>{switch(area){case'Overview':return overview();case'Organisations':return tableOrgs();case'Users & Access':return usersView();case'Subscriptions & Entitlements':return entitlements();case'Feedback Operations':return feedback();case'Product':return <div><div className="mb-4"><div className="font-bold">Product Operations</div><p className="text-xs text-slate-500">Organisations consume published governed capability directly. Normal catalogue use has no Organisation approval queue.</p><div className="mt-3 flex gap-2 overflow-x-auto pb-1">{([['overview','Product overview'],['measure-library','Measures'],['instruments','Instruments'],['languages','Languages'],['sector-mapping','Sector & Context Mapping'],['recommendations','Recommendations & Templates'],['history','Product Change History'],['diagnostics','Product Diagnostics']] as [OpsSection,string][]).map(([id,label])=><button key={id} onClick={()=>setProductSection(id)} className={`rounded-lg px-3 py-2 text-xs whitespace-nowrap ${productSection===id?'bg-slate-900 text-white':'bg-white border'}`}>{label}</button>)}</div></div>{product()}</div>;case'Platform Health':return health();case'Audit':return auditView();case'Settings':return settings()}};
+ return <main className="min-h-screen bg-slate-100 pb-12"><header className="bg-slate-950 text-white"><div className="mx-auto max-w-[1500px] px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3"><div className="flex items-center gap-3"><div className="rounded-xl bg-cyan-500/20 p-2 text-cyan-300"><ShieldCheck/></div><div><h1 className="font-bold text-lg">Fedoo Operator Console</h1><p className="text-xs text-slate-400">Human control plane · Experience reference · all operational fixtures are simulated</p></div></div><div className="flex items-center gap-3"><Capability state="Prototype · Backend Required"/><button onClick={onReturnToApp} className="rounded-lg bg-slate-800 px-3 py-2 text-xs">Return to Organisation App</button></div></div></header><div className="mx-auto max-w-[1500px] p-3 sm:p-6"><div className="grid lg:grid-cols-[220px_1fr] gap-4"><aside className="rounded-2xl bg-slate-900 p-2 h-fit"><nav aria-label="Operator Console" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1">{nav.map(n=>{const Icon=n.icon;return <button key={n.name} onClick={()=>setArea(n.name)} className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs font-semibold ${area===n.name?'bg-cyan-700 text-white':'text-slate-300 hover:bg-slate-800'}`}><Icon className="h-4 w-4 shrink-0"/>{n.name}<ChevronRight className="ml-auto hidden lg:block h-3 w-3"/></button>})}</nav><div className="mt-3 rounded-xl bg-slate-800 p-3 text-[10px] text-slate-400"><CircleHelp className="h-4 w-4 mb-1"/>Experience Reference only. It does not assert production operator capability.</div></aside><section className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-6"><div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-bold text-slate-900">{area}</h2><p className="mt-1 text-xs text-slate-500">{area==='Overview'?'What requires an operator’s attention today?':'Prototype workspace · illustrative status · backend integration required where indicated'}</p></div><Capability state={area==='Product'?'Product workspace':'Experience reference'}/></div>{notice&&<div role="status" className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">{notice}<button className="ml-2 underline" onClick={()=>setNotice('')}>Dismiss</button></div>}{render()}</section></div><p className="mt-4 text-center text-[10px] text-slate-400">Prototype role model — final permissions require Product/Security authority. No silent impersonation. Support view is read-only. Historic participant evidence is immutable.</p></div></main>;
 };

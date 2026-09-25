@@ -141,7 +141,7 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Product Operations</span>
+            <span>Operator Console</span>
           </button>
         </nav>
 

@@ -56,9 +56,9 @@ console.log('Product Operations smoke checks');
 
 // 1. Shell + Overview.
 const shell = render(<OperatorView measures={GOVERNED_MEASURES} onReturnToApp={noop} />);
-check('operator shell renders', shell.includes('Fedoo Product Operations'));
-check('operator shell states no approval queue', shell.includes('no approval queue'));
-check('shell has section navigation', ['Measure Library', 'Instruments', 'Languages', 'Diagnostics'].every((n) => shell.includes(n)));
+check('operator shell renders', shell.includes('Fedoo Operator Console'));
+check('operator shell labels all operational domains', ['Overview', 'Organisations', 'Users & Access', 'Subscriptions & Entitlements', 'Feedback Operations', 'Product', 'Platform Health', 'Audit', 'Settings'].every((n) => shell.includes(n)));
+check('Product workspace is present in console navigation', shell.includes('Product'));
 
 const overview = render(<OpsOverview {...props} />);
 check('overview heading', overview.includes('Operations overview'));
