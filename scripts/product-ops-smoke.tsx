@@ -73,6 +73,9 @@ check('overview separates Instruments from Measures', overview.includes('Instrum
 // Canonical catalogue vs loaded prototype subset.
 check('overview distinguishes canonical catalogue', overview.includes('Canonical catalogue') && overview.includes('84 Measures'));
 check('overview states loaded prototype subset', overview.includes('Loaded in this prototype workspace') && overview.includes(`${model.measures.length}`));
+check('question availability is distinct from analytical readiness', overview.includes('88 selectable questions globally') && overview.includes('Configuration readiness') && overview.includes('analytical readiness'));
+check('band, comparison, movement, and language states are explicit', ['Governed favourable-band semantics', 'Comparison capability', 'Movement capability', 'Language / equivalence capability', 'AVAILABLE', 'DEFERRED'].every((s) => overview.includes(s)));
+check('verified favourable-band mappings are bounded', overview.includes('Quality, Satisfaction and Likelihood') && overview.includes('No other mapping is inferred'));
 
 // Language coverage derives from Instruments, not Measure existence.
 const operationalEnglishInstruments = model.instruments.filter((i) => i.english === 'Operational').length;

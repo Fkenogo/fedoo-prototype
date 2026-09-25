@@ -29,6 +29,9 @@ export type { OpsSection } from './opsTypes';
 
 export interface OpsSectionProps {
   model: ProductOpsModel;
+  canPublish?: boolean;
+  canMutate?: boolean;
+  roleRestrictionMessage?: string;
   onNavigate: (section: OpsSection) => void;
   onCreateDraft: (draft: OpsDraft) => void;
   onAdvanceDraft: (id: string) => void;
@@ -141,6 +144,36 @@ export const OpsOverview: React.FC<OpsSectionProps> = ({ model, onNavigate }) =>
           </span>
         </div>
       </div>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5" aria-labelledby="capability-readiness-heading">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+          <div>
+            <h3 id="capability-readiness-heading" className="text-sm font-bold text-slate-900">Configuration readiness ≠ analytical readiness</h3>
+            <p className="mt-1 text-xs text-slate-500">The V1 catalogue has 88 governed selectable questions globally. Selection does not imply identical downstream analytics.</p>
+          </div>
+          <Badge className="bg-slate-100 text-slate-700 border-slate-200">Verified capability reference</Badge>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {[
+            ['Governed Question / Instrument availability', 'AVAILABLE', '88 selectable questions globally; loaded catalogue items are shown above.'],
+            ['Configuration / selectability', 'AVAILABLE', 'Five governed questions are selected in an Organisation configuration.'],
+            ['Distribution capability', 'AVAILABLE', 'Distribution semantics may exist without governed band or movement semantics.'],
+            ['Governed favourable-band semantics', 'AVAILABLE', 'Verified mappings exist for Quality, Satisfaction and Likelihood in the verified engine context. No other mapping is inferred.'],
+            ['Comparison capability', 'DEFERRED', 'This catalogue summary has no per-question comparison mapping. Apply only an explicit governed mapping and existing comparison rules.'],
+            ['Movement capability', 'DEFERRED', 'This catalogue summary has no per-question movement mapping. A band mapping does not imply movement capability.'],
+            ['Language / equivalence capability', 'DEFERRED', 'English Instrument availability is shown per Instrument. French candidate wording does not establish equivalence.'],
+          ].map(([label, state, detail]) => (
+            <div key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <b className="text-xs text-slate-800">{label}</b>
+                <Badge className={state === 'AVAILABLE' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}>{state}</Badge>
+              </div>
+              <p className="mt-2 text-[11px] leading-4 text-slate-500">{detail}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-[10px] text-slate-400">Availability and configuration are separate from analytical readiness. Missing mappings are not inferred by this prototype.</p>
+      </section>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {cards.map((c) => {
@@ -368,6 +401,9 @@ export const MeasureLibrary: React.FC<OpsSectionProps> = ({ model }) => {
 // ---------------------------------------------------------------------------
 export const InstrumentsWorkspace: React.FC<OpsSectionProps> = ({
   model,
+  canPublish = true,
+  canMutate = true,
+  roleRestrictionMessage = 'Illustrative role restriction — final operator permissions require Product/Security authority.',
   onCreateDraft,
   onAdvanceDraft,
   onUpdateDraftBody,
@@ -534,13 +570,20 @@ export const InstrumentsWorkspace: React.FC<OpsSectionProps> = ({
                       />
                     )}
                     {d.state !== 'Published' && (
+                      <>
                       <button
+                        disabled={!canMutate || (d.state === 'Review' && !canPublish)}
                         onClick={() => onAdvanceDraft(d.id)}
-                        className="text-[11px] font-bold text-cyan-800 hover:text-cyan-950 flex items-center gap-1"
+                        title={!canMutate ? roleRestrictionMessage : d.state === 'Review' && !canPublish ? roleRestrictionMessage : undefined}
+                        className="text-[11px] font-bold text-cyan-800 hover:text-cyan-950 flex items-center gap-1 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ArrowRight className="w-3 h-3" />
                         <span>{d.state === 'Draft' ? 'Send to Review' : 'Publish new version'}</span>
                       </button>
+                      {((!canMutate) || (d.state === 'Review' && !canPublish)) && (
+                        <p className="text-[10px] text-amber-800">{roleRestrictionMessage}</p>
+                      )}
+                      </>
                     )}
                   </li>
                 ))}

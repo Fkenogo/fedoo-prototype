@@ -240,6 +240,26 @@ patterns. Simulated operational actions, fixtures, health signals, permissions a
 are reference-only. Any authority, provider behavior, commercial policy or data access beyond
 established Product Truth requires future Product/Security/Commercial authority.
 
+### Final Operator Console alignment pass
+
+- **Configuration vs analytical readiness:** Product Operations presents the 88 globally selectable
+  V1 Questions separately from configuration/selectability and downstream distribution, band,
+  comparison, movement and language/equivalence capability. Verified favourable-band mappings are
+  identified only for Quality, Satisfaction and Likelihood in the verified engine context. No
+  comparison, movement or equivalence capability is inferred from availability or band mappings;
+  the summary marks unmapped catalogue-wide comparison/movement as deferred pending explicit
+  governed per-question mappings. This is a descriptive reference, not new analytical semantics.
+- **Product lifecycle in platform Audit:** Draft-to-Review and Review-to-Published transitions
+  append session-local platform Audit entries with target, prior/resulting state, note, and
+  `Product publication` source for publication. Specialist Product Change History remains
+  available separately. Neither history claims durable production audit storage.
+- **Illustrative role constraints:** The five role options remain. Support Operator cannot publish;
+  Product Operator cannot grant/remove entitlement overrides; Read-only Auditor has representative
+  mutation controls disabled and Product handlers reject mutation; Platform Administrator has
+  broad prototype controls. Role labels and restrictions are explicitly illustrative, not a final
+  permission matrix or backend RBAC. Denied actions explain that Product/Security authority is
+  required to finalize permissions.
+
 ### Scenarios and validation
 
 Fixtures cover normal multi-Organisation operations, partial onboarding (Mwezi Market), pending owner
