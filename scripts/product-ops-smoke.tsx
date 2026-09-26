@@ -71,7 +71,7 @@ check('overview shows separate Operational and Defined counts', overview.include
 check('overview separates Instruments from Measures', overview.includes('Instruments') && overview.includes('Measures without an Instrument'));
 
 // Canonical catalogue vs loaded prototype subset.
-check('overview distinguishes canonical catalogue', overview.includes('Canonical catalogue') && overview.includes('84 Measures'));
+check('overview distinguishes canonical catalogue', overview.includes('Canonical catalogue') && overview.includes('88 Measures'));
 check('overview states loaded prototype subset', overview.includes('Loaded in this prototype workspace') && overview.includes(`${model.measures.length}`));
 check('question availability is distinct from analytical readiness', overview.includes('88 selectable questions globally') && overview.includes('Configuration readiness') && overview.includes('analytical readiness'));
 check('band, comparison, movement, and language states are explicit', ['Governed favourable-band semantics', 'Comparison capability', 'Movement capability', 'Language / equivalence capability', 'AVAILABLE', 'DEFERRED'].every((s) => overview.includes(s)));

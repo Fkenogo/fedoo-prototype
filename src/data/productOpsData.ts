@@ -58,7 +58,7 @@ export interface OpsMeasure {
 
 // Canonical Fedoo catalogue size (Product Truth authority). This prototype
 // loads a bounded fixture subset; the two must not be conflated in the UI.
-export const CANONICAL_MEASURE_COUNT = 84;
+export const CANONICAL_MEASURE_COUNT = 88;
 
 export interface OpsRecommendationMap {
   id: string;
