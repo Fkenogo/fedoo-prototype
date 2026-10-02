@@ -233,7 +233,7 @@ export interface TeamMember {
 }
 
 // Shell & Prototype Routing Types
-export type AppRoute = 'app' | 'setup' | 'feedback-point-setup' | 'feedback' | 'operator';
+export type AppRoute = 'app' | 'setup' | 'feedback-point-setup' | 'feedback' | 'operator' | 'console';
 export type AppTab = 'overview' | 'feedback-points' | 'what-we-track' | 'locations' | 'activity';
 export type PrototypeScenario =
   | 'multi-location'

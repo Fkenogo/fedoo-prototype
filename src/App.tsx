@@ -15,6 +15,7 @@ import { SettingsView } from './components/SettingsView';
 import { ParticipantFeedbackView } from './components/ParticipantFeedbackView';
 import { FirstRunSetup } from './components/FirstRunSetup';
 import { OperatorView } from './components/OperatorView';
+import { OperatorConsole } from './console/OperatorConsole';
 import { FirstFeedbackPointWizard } from './components/FirstFeedbackPointWizard';
 import { AddAreaToFeedbackPointsModal } from './components/AddAreaToFeedbackPointsModal';
 import { PrintFlyerModal } from './components/PrintFlyerModal';
@@ -72,7 +73,9 @@ export default function App() {
   const [currentScenario, setCurrentScenario] = useState<PrototypeScenario>('multi-location');
 
   // Top-Level Route Perspective: 'app' (Organisation), 'setup' (First-run), 'feedback' (Customer Page), 'operator' (Platform Operator)
-  const [currentRoute, setCurrentRoute] = useState<AppRoute>('app');
+  // A #/console/... hash opens the Operator Console Experience Reference directly (shareable review routes).
+  const [currentRoute, setCurrentRoute] = useState<AppRoute>(() =>
+    typeof window !== 'undefined' && window.location.hash.startsWith('#/console') ? 'console' : 'app');
 
   // Participant view mode: full-width responsive standalone vs simulated mobile phone frame.
   // The real participant route defaults to a full-viewport mobile experience;
@@ -678,6 +681,10 @@ export default function App() {
             onSubmitFeedback={handleParticipantFeedbackSubmit}
             onClose={closeParticipant}
           />
+        </main>
+      ) : currentRoute === 'console' ? (
+        <main className="flex-1 w-full">
+          <OperatorConsole onReturnToApp={() => setCurrentRoute('app')} />
         </main>
       ) : currentRoute === 'operator' ? (
         <main className="flex-1 w-full">

@@ -1,0 +1,40 @@
+// Operator Console Experience Reference smoke checks (review tooling only). Run: npm run test:console
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { ConsoleProvider } from '../src/console/store';
+import { OrganisationsView, OrganisationDetailView } from '../src/console/views/Organisations';
+import { FeedbackOpsView, FeedbackPointDetailView } from '../src/console/views/Feedback';
+import { AccessView } from '../src/console/views/Access';
+import { HealthView } from '../src/console/views/Health';
+import { AttentionView } from '../src/console/views/Attention';
+import { CatalogueView } from '../src/console/views/Catalogue';
+import { SettingsView } from '../src/console/views/Settings';
+import { SupportEntryView } from '../src/console/views/Support';
+import { ORGANISATIONS } from '../src/console/model';
+import { CANONICAL_ROWS } from '../src/console/canonicalCatalogue';
+
+let failures = 0;
+const check = (n: string, c: boolean) => { if (c) console.log(`  ok   ${n}`); else { failures++; console.log(`  FAIL ${n}`); } };
+const r = (el: React.ReactElement) => renderToStaticMarkup(<ConsoleProvider>{el}</ConsoleProvider>);
+const text = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+
+const orgs = text(r(<OrganisationsView />));
+check('directory lists every Organisation', ORGANISATIONS.every((o) => orgs.includes(o.name)));
+check('directory shows admission, setup and next action', orgs.includes('Pending admission') && orgs.includes('Admit Organisation'));
+check('canonical catalogue is 88', CANONICAL_ROWS.length === 88);
+const detail = text(r(<OrganisationDetailView id={ORGANISATIONS[3].id} />));
+check('detail has the eight tabs', ['Overview', 'Admission & lifecycle', 'Commercial', 'Users & Access', 'Health', 'Needs Attention', 'Timeline'].every((t) => detail.includes(t)));
+const fb = text(r(<FeedbackOpsView />));
+check('feedback shows where chains stop', fb.includes('Stops at Session') && fb.includes('Stops at Acceptance'));
+check('feedback shows no Evidence content', !/answer text|verbatim comment/i.test(fb));
+check('feedback detail renders all nine links', ['Link', 'Result', 'Signal'].every((t) => text(r(<FeedbackPointDetailView id="fp-s2" />)).includes(t)));
+check('access states unavailable provider facts', text(r(<AccessView />)).includes('unavailable'));
+const health = text(r(<HealthView />));
+check('health keeps not_observed distinct', health.includes('Not observed') && health.includes('Observations, not scores'));
+const att = text(r(<AttentionView />));
+check('attention shows "No governed severity" instead of inventing one', att.includes('No governed severity'));
+check('catalogue distinguishes repository from runtime', text(r(<CatalogueView />)).includes('Repository-governed') && text(r(<CatalogueView />)).includes('Runtime-authored'));
+check('settings has no editable control', text(r(<SettingsView />)).includes('No operator-controlled setting has an owner yet'));
+check('support states no impersonation', text(r(<SupportEntryView />)).includes('impersonat'));
+console.log(failures ? `${failures} failed` : 'all passed');
+process.exit(failures ? 1 : 0);

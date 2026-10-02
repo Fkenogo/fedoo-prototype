@@ -143,6 +143,18 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             <Layers className="w-3.5 h-3.5" />
             <span>Product Operations</span>
           </button>
+
+          <button
+            onClick={() => onRouteChange('console')}
+            className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+              currentRoute === 'console'
+                ? 'bg-cyan-700 text-white shadow-xs'
+                : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Operator Console</span>
+          </button>
         </nav>
 
         {/* Right: State Scenarios & Tools */}
