@@ -76,3 +76,45 @@ Legend: **EXP** experience-only · **COMP** new composition over existing servic
 
 ## 8. Confirmations
 Product Truth, FOA-001, permissions and state machines are unchanged; `Fkenogo/fedoo` was only read. `preview/pages.py` was not touched. No deployment. Pilot Operability remains paused.
+
+---
+
+# Pass 2 — Admission & commercial continuity (Founder review, 2026-10-02)
+
+## 9. Founder commercial continuity disposition
+The operating model the console must teach: Organisation established → pending admission → operator admits → Basic + 100 complimentary CU available → accepted feedback consumes 1 CU each → balance reaches zero → new accepted feedback blocked → operator confirms payment / commercial approval outside Fedoo → operator grants CU pack → acceptance resumes. This is the pilot / pre-payment-integration model. Payment automation is shown honestly as "Not integrated yet — manual operator process". Fedoo stores no bank transfer, cash receipt, provider response, invoice, tax or payment-method record.
+
+## 10. No Trial lifecycle state
+There is no governed Trial lifecycle, timer, expiry, free plan or trial Organisation. The word "Trial" does not appear in the console except in this prohibition. Admission (`pending` / `admitted`), lifecycle (`operational` / `suspended` / `closed`) and commercial capacity (tier + CU balance) are three separate state dimensions and are never merged into one status.
+
+## 11. 100 CU complimentary allowance semantics
+One-time, complimentary, granted at successful Organisation establishment (`signup_grant` 100 CU in the ledger), visible in the directory ("Complimentary" / "100 CU initial grant") and in Commercial ("Initial complimentary allowance"). Not recurring, not a separate lifecycle state, not timer-based. Directory distinguishes "Complimentary only" (no `operator_grant` in the ledger) from "Paid / manual CU" (at least one `operator_grant`). Tier stays Basic unless a `change_tier` command moves it.
+
+## 12. Zero-CU semantics
+`0 CU` + "New accepted feedback is blocked" (+ "Acceptance blocked" chip). Explicitly unaffected: admission stays as-is, lifecycle stays as-is, history and configuration remain preserved, and a CU grant restores acceptance. Zero CU never suspends, closes or un-admits. "Low" (1–20 CU remaining in this prototype) is an operator watch flag only — no governed low-balance threshold exists.
+
+## 13. Manual pre-payment-integration continuation
+Flow: zero → operator confirms commercial approval outside Fedoo → "Grant CU pack" → governed grant dialog (current balance, fixed pack, projected balance, permission, reason, exact phrase, audit notice, "Confirm commercial approval outside Fedoo before granting CU") → balance increases → Zero-CU Needs Attention item disappears (derived, queue never mutates). No balance overwrite ("Set balance to X") exists; the pack is fixed by tier (Basic 100, Premium 50 in the fixtures).
+
+## 14. Admission / lifecycle / commercial separation in the UI
+Overview tiles are labelled A · Admission, B · Operational lifecycle, C · Commercial, D · Feedback state, followed by Needs Attention and a factual "Recommended next operator action". An "Operator actions" card lists only Admit, Grant CU pack, Change tier, Suspend, Reinstate, Close, each gated by held permission and by the Organisation's own state; disallowed commands are not offered and no Reject / Start trial / Extend trial / Mark paid / Cancel subscription / Refund command is invented. Tier changes state "does not move CU and is not payment success". Lifecycle tab states that suspend/reinstate/close are lifecycle decisions and a grant never admits or closes.
+
+## 15. Directory next-action alignment
+Pending admission → Admit Organisation · Zero CU → Grant CU pack · Suspended (no queue item) → Review suspension (reinstate offered where permitted in Admission & lifecycle) · Feedback diagnostic issue → Open Feedback Point diagnostic · Catalogue readiness issue → Open catalogue readiness · No real action → "No next action named by any implemented source". `nextAction()` is unchanged in rule; the UI now also surfaces the factual recommendation on the overview.
+
+## 16. Catalogue vocabulary correction — exact 8/5/75 replacement
+Old wording ("8 selectable / 5 conditional / 75 not selectable", "Configuration-selectable") risked implying 80 of 88 canonical questions are unavailable to customers because instrument readiness is incomplete. Canonical tuple is `[productId, key, name, category, sector, readiness, configStatus, selectable, sessionPresentable, scaleFamily, questionVersion]`. Observed partition of the 88:
+- `INSTRUMENT-PARTIAL|AVAILABLE|true|yes`: 5
+- `DEFINED|AVAILABLE|true|yes`: 3
+- `DEFINED|UNAVAILABLE|false|conditional`: 5
+- `DEFINED|UNAVAILABLE|false|no`: 75
+New experience wording: **8 Session-presentable** (instrument ready for a live session) / **5 Conditional** (presentable only when its rule is met) / **75 Instrument incomplete** (no usable Question Version yet — still canonical). Semantic mapping recorded here: A · governed question eligibility = all 88 rows are canonical governed Measures; B · instrument/session readiness = the 8/5/75 split above (`selectable` + `sessionPresentable` + `configStatus`); C · analytical calculation readiness = per-Feedback-Point diagnostic (`calculation_rule_unavailable` / `band_map_unavailable` → "Analytical readiness gap", Feedback Point stays operational), never this list. All 5 `INSTRUMENT-PARTIAL` rows are session-presentable, proving partial definition never implied unselectability. Canonical data unchanged.
+
+## 17. Legacy Product Operations disposition
+Option B adopted: kept, but the top-level "Product Operations" entry is relabelled "Product Operations · legacy" (tooltip: "Legacy prototype slice — not current Operator Console authority") and the slice itself opens with an amber banner carrying that exact sentence plus the 84-Measure / no-approval-queue note. The Operator Console remains the unambiguous current Experience Reference.
+
+## 18. Production binding implications (Pass 2 deltas, no Product change)
+GAP-1 retained: directory tier/CU + health still need Organisation-target reads per row; the "Not authorised" fallback stays designed. New Pass 2 surfaces bind as: commercial journey panel ← `read_operator_commercial_projection` + ledger (Stage 3); complimentary flag ← `signup_grant` entry presence; zero/low presentation ← balance value (low flag is EXP-only guidance, never a backend threshold); grant dialog facts ← tier + balance + fixed pack rule (existing `grant_pack`); attention disappearance ← derived `needs_attention` re-read after `grant_pack`. Catalogue relabel binds to the existing `list_measures` / `read_catalogue_overview` fields (`selectable`, `sessionPresentable`, `configStatus`, `readiness`); no new read model.
+
+## 19. Pass 2 confirmations
+`Fkenogo/fedoo` untouched; Product Truth / FOA-001 / permissions / state machines unchanged; `preview/pages.py` untouched; no deployment; Pilot Operability remains paused. Synthetic scenarios cover: pending → admit (Lakeview), newly admitted 100 CU (Umoja), 1 CU (Corner Bistro), 0 CU blocked (Savannah), grant → attention clears, Basic → Premium, suspended → reinstate (Fresh Mart), operational → suspend, close.

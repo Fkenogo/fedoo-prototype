@@ -68,7 +68,21 @@ export const TierChip: React.FC<{ v: string }> = ({ v }) => <Chip tone={v === 'p
 export const SetupChip: React.FC<{ v: string }> = ({ v }) =>
   v === 'complete' ? <Chip tone="emerald">Setup complete</Chip> : <Chip tone="amber">Setup incomplete</Chip>;
 export const CuChip: React.FC<{ balance: number }> = ({ balance }) =>
-  balance <= 0 ? <Chip tone="rose">0 CU</Chip> : <Chip tone="slate" className="tabular-nums">{balance} CU</Chip>;
+  balance <= 0 ? <Chip tone="rose" title="New accepted feedback is blocked. Admission, lifecycle, history and configuration are unchanged.">0 CU</Chip> : <Chip tone="slate" className="tabular-nums">{balance} CU</Chip>;
+
+// Commercial continuity vocabulary. Never a lifecycle state: "Trial" must not appear anywhere.
+export const ComplimentaryChip: React.FC = () => (
+  <Chip tone="sky" title="One-time complimentary allowance granted at establishment. Not recurring, not a lifecycle state, not time-limited.">Complimentary</Chip>
+);
+export const PaidPackChip: React.FC = () => (
+  <Chip tone="indigo" title="Balance includes an operator-granted CU pack after commercial approval outside Fedoo.">Paid / manual CU</Chip>
+);
+export const LowCuChip: React.FC<{ balance: number }> = ({ balance }) => (
+  <Chip tone="amber" title={`Balance is ${balance} CU. No governed low-balance threshold exists; this is an operator watch flag only.`}>Low · {balance} CU left</Chip>
+);
+export const AcceptanceBlockedChip: React.FC = () => (
+  <Chip tone="rose" title="New accepted feedback is blocked. History and configuration remain preserved.">Acceptance blocked</Chip>
+);
 
 // Health / boundary states. Never colour-only: every state has its own icon + label,
 // and not_observed / unavailable / unknown are visually distinct from healthy.

@@ -57,7 +57,7 @@ const Overview: React.FC<{ go: (v: string) => void }> = ({ go }) => (
       <div className="grid sm:grid-cols-4 gap-4">
         <Field label="Runtime Measures">{CATALOGUE_COUNTS.runtimeMeasures.active} active of {CANONICAL_ROWS.length} canonical</Field>
         <Field label="Standard Questions">{CATALOGUE_COUNTS.standardQuestions.active} active · {CATALOGUE_COUNTS.standardQuestions.draft} draft</Field>
-        <Field label="Configuration-selectable">{selectable} Measures</Field>
+        <Field label="Session-presentable">{selectable} Measures</Field>
         <Field label="Language">English only</Field>
       </div>
       <button onClick={() => go('diagnostics')} className="mt-3 text-[11px] font-semibold text-cyan-800 flex items-center gap-1">Open diagnostics<ArrowRight className="w-3 h-3" /></button>
@@ -72,16 +72,16 @@ const Readiness: React.FC = () => {
     (sel === 'all' || (sel === 'yes' ? r[7] : sel === 'conditional' ? !r[7] && r[8] === 'conditional' : !r[7] && r[8] === 'no'))), [t, sel, cg]);
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-3">
-        <Card><Eyebrow>Selectable for configuration</Eyebrow><div className="text-2xl font-bold text-emerald-700 tabular-nums mt-1">{selectable}</div></Card>
-        <Card><Eyebrow>Conditional · not selectable</Eyebrow><div className="text-2xl font-bold text-amber-600 tabular-nums mt-1">{conditional}</div></Card>
-        <Card><Eyebrow>Not selectable</Eyebrow><div className="text-2xl font-bold text-slate-500 tabular-nums mt-1">{CANONICAL_ROWS.length - selectable - conditional}</div></Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card><Eyebrow>Session-presentable</Eyebrow><div className="text-2xl font-bold text-emerald-700 tabular-nums mt-1">{selectable}</div><div className="text-[10px] text-slate-400 mt-1">Instrument ready for a live session</div></Card>
+        <Card><Eyebrow>Conditional</Eyebrow><div className="text-2xl font-bold text-amber-600 tabular-nums mt-1">{conditional}</div><div className="text-[10px] text-slate-400 mt-1">Presentable only when its rule is met</div></Card>
+        <Card><Eyebrow>Instrument incomplete</Eyebrow><div className="text-2xl font-bold text-slate-500 tabular-nums mt-1">{CANONICAL_ROWS.length - selectable - conditional}</div><div className="text-[10px] text-slate-400 mt-1">No usable Instrument yet — still canonical</div></Card>
       </div>
-      <Notice tone="neutral">Readiness is derived from the repository and the owning validators. “Defined” is a Product definition state; only Measures with an operational Instrument can be selected by an Organisation. {partial} Measures carry an <Mono>INSTRUMENT-PARTIAL</Mono> repository state.</Notice>
+      <Notice tone="neutral">Three separate dimensions. <strong>A · Governed question eligibility</strong>: all {CANONICAL_ROWS.length} rows are canonical governed Measures — none is “unavailable to customers” by catalogue status. <strong>B · Instrument / session readiness</strong>: {selectable} session-presentable, {conditional} conditional, {CANONICAL_ROWS.length - selectable - conditional} instrument-incomplete (no usable Question Version yet). <strong>C · Analytical calculation readiness</strong>: whether a Measure has a governed result band / calculation mapping is decided per Feedback Point diagnostic (see “Analytical readiness gap”), never by this list. {partial} Measures carry an <Mono>INSTRUMENT-PARTIAL</Mono> repository state and all {partial} are still session-presentable — partial definition never implies unselectability.</Notice>
       <div className="rounded-2xl border border-slate-200 bg-white p-3 flex flex-col lg:flex-row lg:items-center gap-3">
         <SearchBox value={q} onChange={(v) => { setQ(v); setN(20); }} placeholder="Search Measure, product id or sector" className="lg:flex-1" />
         <Select label="Category" value={cg} onChange={setCg} options={[{ id: 'all', label: 'All' }, { id: 'core', label: 'Core' }, { id: 'extended', label: 'Extended' }, { id: 'sector', label: 'Sector' }]} />
-        <Select label="Configuration" value={sel} onChange={setSel} options={[{ id: 'all', label: 'All' }, { id: 'yes', label: 'Selectable' }, { id: 'conditional', label: 'Conditional' }, { id: 'no', label: 'Not selectable' }]} />
+        <Select label="Session readiness" value={sel} onChange={setSel} options={[{ id: 'all', label: 'All' }, { id: 'yes', label: 'Session-presentable' }, { id: 'conditional', label: 'Conditional' }, { id: 'no', label: 'Instrument incomplete' }]} />
       </div>
       <div className="text-[11px] text-slate-500 px-1">{rows.length} of {CANONICAL_ROWS.length} canonical Measures</div>
       <ul className="space-y-2">{rows.slice(0, n).map((r) => (
@@ -89,7 +89,7 @@ const Readiness: React.FC = () => {
           <div className="sm:flex-1 min-w-0"><div className="text-xs font-bold text-slate-900">{r[2]}</div><div className="text-[10px] text-slate-400 flex gap-2"><Mono>{r[0]}</Mono><span className="capitalize">{r[3]}{r[4] ? ` · ${r[4]}` : ''}</span></div></div>
           <div className="flex flex-wrap gap-1.5 items-center">
             <Chip tone={r[5] === 'DEFINED' ? 'slate' : 'amber'}>{r[5] === 'DEFINED' ? 'Defined' : 'Instrument partial'}</Chip>
-            {r[7] ? <Chip tone="emerald" icon={<Check className="w-3 h-3" />}>Selectable</Chip> : r[8] === 'conditional' ? <Chip tone="amber">Conditional</Chip> : <Chip tone="slate">Not selectable</Chip>}
+            {r[7] ? <Chip tone="emerald" icon={<Check className="w-3 h-3" />}>Session-presentable</Chip> : r[8] === 'conditional' ? <Chip tone="amber">Conditional</Chip> : <Chip tone="slate">Instrument incomplete</Chip>}
             <Chip tone="slate">{r[9]} scale</Chip>
           </div>
         </li>))}</ul>
@@ -116,7 +116,7 @@ const Lineage: React.FC = () => (
       <ol className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[['Repository', `${CANONICAL_ROWS.length} Measures · ${CANONICAL_ROWS.length} Instruments`, 'bg-slate-900 text-white border-slate-900'],
           ['Runtime projection', `${CATALOGUE_COUNTS.runtimeMeasures.active} active Measures`, 'bg-white border-cyan-300'],
-          ['Selectable', `${selectable} Measures ready to configure`, 'bg-white border-slate-200'],
+          ['Session-presentable', `${selectable} Measures with a usable Instrument`, 'bg-white border-slate-200'],
           ['Effective configurations', '16 configured Feedback Points', 'bg-white border-slate-200']].map(([t, s, c], i) => (
           <li key={t} className={cx('rounded-xl border p-3 relative', c)}><div className="text-[10px] uppercase tracking-wider font-bold opacity-70">Step {i + 1}</div><div className="text-xs font-bold mt-0.5">{t}</div><div className="text-[11px] opacity-80 mt-0.5">{s}</div></li>))}
       </ol>

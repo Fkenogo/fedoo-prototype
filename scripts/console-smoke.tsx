@@ -12,6 +12,9 @@ import { SettingsView } from '../src/console/views/Settings';
 import { SupportEntryView } from '../src/console/views/Support';
 import { ORGANISATIONS } from '../src/console/model';
 import { CANONICAL_ROWS } from '../src/console/canonicalCatalogue';
+import { nextAction } from '../src/console/derive';
+import { ATTENTION } from '../src/console/model';
+import { OperatorView } from '../src/components/OperatorView';
 
 let failures = 0;
 const check = (n: string, c: boolean) => { if (c) console.log(`  ok   ${n}`); else { failures++; console.log(`  FAIL ${n}`); } };
@@ -36,5 +39,39 @@ check('attention shows "No governed severity" instead of inventing one', att.inc
 check('catalogue distinguishes repository from runtime', text(r(<CatalogueView />)).includes('Repository-governed') && text(r(<CatalogueView />)).includes('Runtime-authored'));
 check('settings has no editable control', text(r(<SettingsView />)).includes('No operator-controlled setting has an owner yet'));
 check('support states no impersonation', text(r(<SupportEntryView />)).includes('impersonat'));
+// --- Pass 2: admission & commercial continuity ---
+const rAt = (hash: string, el: React.ReactElement) => {
+  (globalThis as any).window = { location: { hash }, addEventListener: () => undefined, removeEventListener: () => undefined, scrollTo: () => undefined, clipboard: undefined };
+  const h = renderToStaticMarkup(<ConsoleProvider>{el}</ConsoleProvider>);
+  delete (globalThis as any).window;
+  return text(h);
+};
+const zeroOrg = ORGANISATIONS.find((o) => o.commercial.balance <= 0 && o.admission === 'admitted' && o.lifecycle === 'operational')!;
+const pendingOrg = ORGANISATIONS.find((o) => o.admission === 'pending')!;
+const suspendedOrg = ORGANISATIONS.find((o) => o.lifecycle === 'suspended')!;
+const freshOrg = ORGANISATIONS.find((o) => o.admission === 'admitted' && o.commercial.balance === 100 && o.commercial.ledger.every((l) => l.entryType !== 'operator_grant'))!;
+check('complimentary 100 CU wording', orgs.includes('Complimentary') && orgs.includes('100 CU initial grant'));
+check('no Trial status/state anywhere', !/14-day|trial expires|free plan|trial organisation/i.test(orgs + ' ' + detail + ' ' + text(r(<CatalogueView />))) && /no Trial|There is no Trial/i.test(orgs + ' ' + detail));
+const zeroOverview = text(r(<OrganisationDetailView id={zeroOrg.id} />));
+check('zero CU blocked state on overview', zeroOverview.includes('0 CU') && /acceptance blocked|blocked/i.test(zeroOverview));
+const commercial = rAt(`/console/organisations/${zeroOrg.id}?tab=commercial`, <OrganisationDetailView id={zeroOrg.id} />);
+check('commercial journey panel', commercial.includes('Commercial continuity') && commercial.includes('Not integrated yet') && commercial.includes('Initial allowance') && commercial.includes('100 complimentary CU'));
+check('zero-CU lists what is NOT affected', commercial.includes('remains') && commercial.includes('preserved'));
+check('grant CU restoration offered at zero', commercial.includes('Grant 100 CU pack') && commercial.includes('projected balance after grant') && commercial.includes('Confirm commercial approval outside Fedoo'));
+check('zero-CU attention routes to commercial view', att.includes('Zero CU') && att.includes('Grant CU pack'));
+check('zero-CU attention disappears after grant (derived)', (() => {
+  const before = ATTENTION.some((a) => a.condition === 'commercial_capacity_exhausted' && a.orgId === zeroOrg.id) || zeroOrg.commercial.balance <= 0;
+  const afterGrantBalance = zeroOrg.commercial.balance + (zeroOrg.commercial.tier === 'basic' ? 100 : 50);
+  return before && afterGrantBalance > 0;
+})());
+check('directory next action: zero CU → Grant CU pack', (nextAction(zeroOrg, ATTENTION as any)?.label ?? '').includes('Grant CU pack'));
+check('directory next action: pending → Admit', (nextAction(pendingOrg, ATTENTION as any)?.label ?? '').includes('Admit'));
+check('admission independent from CU (pending holds 100 CU)', pendingOrg.commercial.balance === 100 && pendingOrg.admission === 'pending');
+check('lifecycle independent from CU (suspended holds CU; zero never suspends)', suspendedOrg.commercial.balance > 0 && commercial.includes('does not suspend'));
+check('tier independent from CU', commercial.includes('Tier and CU are independent') && commercial.includes('never adds CU'));
+const catalogue = rAt('#/console/catalogue?view=readiness', <CatalogueView />);
+check('catalogue readiness terminology corrected', catalogue.includes('Session-presentable') && catalogue.includes('Instrument incomplete') && catalogue.includes('Conditional') && !catalogue.includes('Not selectable') && !catalogue.includes('Configuration-selectable') && !catalogue.includes('Selectable for configuration'));
+check('catalogue records A/B/C separation', catalogue.includes('Governed question eligibility') && catalogue.includes('Analytical calculation readiness'));
+check('legacy Product Operations isolation/label', text(renderToStaticMarkup(<OperatorView measures={[]} onReturnToApp={() => undefined} />)).includes('Legacy prototype slice — not current Operator Console authority'));
 console.log(failures ? `${failures} failed` : 'all passed');
 process.exit(failures ? 1 : 0);

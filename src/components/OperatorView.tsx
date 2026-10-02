@@ -137,6 +137,9 @@ export const OperatorView: React.FC<OperatorViewProps> = ({ measures, onReturnTo
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-5 pb-20">
+      <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-[11px] text-amber-900 leading-relaxed">
+        <strong>Legacy prototype slice — not current Operator Console authority.</strong> This Product Operations view still reflects older assumptions (historical 84-Measure reference, no Organisation approval queue). For Founder review, use <strong>Operator Console</strong> as the current operator Experience Reference.
+      </div>
       {/* Operator shell top bar */}
       <div className="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -134,6 +134,7 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
 
           <button
             onClick={() => onRouteChange('operator')}
+            title="Legacy prototype slice — not current Operator Console authority"
             className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
               currentRoute === 'operator'
                 ? 'bg-cyan-700 text-white shadow-xs'
@@ -141,7 +142,7 @@ export const PrototypeReviewBar: React.FC<PrototypeReviewBarProps> = ({
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Product Operations</span>
+            <span>Product Operations · legacy</span>
           </button>
 
           <button
