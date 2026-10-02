@@ -68,18 +68,11 @@ export function worstChain(fps: FeedbackPoint[]): { stoppedAt: number; total: nu
 // Admission, lifecycle and commercial capacity remain separate state dimensions.
 // There is no governed low-balance threshold and no Trial lifecycle state.
 // ---------------------------------------------------------------------------
-export const LOW_CU_WATCH = 20;
 export function hasManualGrant(o: Organisation): boolean {
   return o.commercial.ledger.some((l) => l.entryType === 'operator_grant');
 }
 export function isComplimentaryOnly(o: Organisation): boolean {
   return !hasManualGrant(o);
-}
-export type CuState = 'zero' | 'low' | 'ok';
-export function cuState(o: Organisation): CuState {
-  if (o.commercial.balance <= 0) return 'zero';
-  if (o.commercial.balance <= LOW_CU_WATCH) return 'low';
-  return 'ok';
 }
 
 // "Relevant next action" is the owning command named by the Needs Attention item,

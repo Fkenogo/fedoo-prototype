@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { ArrowRight, Building2, Check, ChevronRight, Clock, Lock, MapPin, ShieldCheck } from 'lucide-react';
 import { useConsole } from '../store';
 import {
-  absTime, attentionOf, cuState, eligibility, feedbackPointFacts, firstAbsentDirectory, fpsOf, hasManualGrant, humanize, isComplimentaryOnly, nextAction, relTime, rollup, shortId,
+  absTime, attentionOf, eligibility, feedbackPointFacts, firstAbsentDirectory, fpsOf, hasManualGrant, humanize, isComplimentaryOnly, nextAction, relTime, rollup, shortId,
 } from '../derive';
 import { AuditEvent, CONDITIONS, Organisation } from '../model';
 import {
   AcceptanceBlockedChip, AdmissionChip, Btn, Card, CardHeader, Chip, CommandDialog, CommandSpec, ComplimentaryChip, cx, CuChip, Disclosure, EmptyState, Eyebrow, Field,
-  GatedAction, HealthChip, LifecycleChip, LowCuChip, Mono, Notice, NotAuthorised, PageHeader, PaidPackChip, ScopeChip, SearchBox, Select, SetupChip, Tabs, TierChip,
+  GatedAction, HealthChip, LifecycleChip, Mono, Notice, NotAuthorised, OperatorGrantedChip, PageHeader, ScopeChip, SearchBox, Select, SetupChip, Tabs, TierChip,
 } from '../ui';
 import { AttentionCard, FpChainRow, OrgLink } from './shared';
 import { HealthPanel } from './Health';
@@ -55,11 +55,9 @@ const OrgRow: React.FC<{ o: Organisation }> = ({ o }) => {
                 <TierChip v={o.commercial.tier} /><CuChip balance={o.commercial.balance} />
                 {o.commercial.balance <= 0
                   ? <AcceptanceBlockedChip />
-                  : cuState(o) === 'low'
-                    ? <LowCuChip balance={o.commercial.balance} />
-                    : isComplimentaryOnly(o)
-                      ? <ComplimentaryChip />
-                      : hasManualGrant(o) ? <PaidPackChip /> : null}
+                  : isComplimentaryOnly(o)
+                    ? <ComplimentaryChip />
+                    : <OperatorGrantedChip />}
               </>
             ) : <Chip tone="slate" icon={<Lock className="w-3 h-3" />}>Not authorised</Chip>}
           </div>
@@ -109,8 +107,8 @@ export const OrganisationsView: React.FC = () => {
     (admission === 'all' || o.admission === admission) && (lifecycle === 'all' || o.lifecycle === lifecycle) &&
     (attn === 'all' || (attn === 'yes') === (attentionOf(o.id, attention).length > 0)) &&
     (commercial === 'all' || (commercial === 'zero' ? o.commercial.balance <= 0
-      : commercial === 'low' ? (o.commercial.balance > 0 && o.commercial.balance <= 20)
       : commercial === 'complimentary' ? isComplimentaryOnly(o) && o.commercial.balance > 0
+      : commercial === 'granted' ? hasManualGrant(o)
       : commercial === 'has' ? o.commercial.balance > 0 : o.commercial.tier === commercial))
   ).sort((a, b) => (a.admission === 'pending' ? 0 : 1) - (b.admission === 'pending' ? 0 : 1) || b.establishedAt.localeCompare(a.establishedAt)), [orgs, t, admission, lifecycle, attn, commercial, attention]);
   const counts = {
@@ -142,7 +140,7 @@ export const OrganisationsView: React.FC = () => {
           <Select label="Admission" value={admission} onChange={setAdmission} options={[{ id: 'all', label: 'All' }, { id: 'pending', label: 'Pending' }, { id: 'admitted', label: 'Admitted' }]} />
           <Select label="Lifecycle" value={lifecycle} onChange={setLifecycle} options={[{ id: 'all', label: 'All' }, { id: 'operational', label: 'Operational' }, { id: 'suspended', label: 'Suspended' }, { id: 'closed', label: 'Closed' }]} />
           <Select label="Attention" value={attn} onChange={setAttn} options={[{ id: 'all', label: 'All' }, { id: 'yes', label: 'Needs attention' }, { id: 'no', label: 'None' }]} />
-          <Select label="Commercial" value={commercial} onChange={setCommercial} options={[{ id: 'all', label: 'All' }, { id: 'zero', label: 'Zero CU · blocked' }, { id: 'low', label: 'Low CU · watch' }, { id: 'complimentary', label: 'Complimentary only' }, { id: 'has', label: 'Has CU' }, { id: 'basic', label: 'Basic' }, { id: 'premium', label: 'Premium' }]} />
+          <Select label="Commercial" value={commercial} onChange={setCommercial} options={[{ id: 'all', label: 'All' }, { id: 'zero', label: 'Zero CU · blocked' }, { id: 'has', label: 'Has CU' }, { id: 'complimentary', label: 'Complimentary only' }, { id: 'granted', label: 'Operator-granted CU' }, { id: 'basic', label: 'Basic' }, { id: 'premium', label: 'Premium' }]} />
         </div>
       </div>
       <div className="flex items-center justify-between mb-2 px-1">
@@ -156,7 +154,7 @@ export const OrganisationsView: React.FC = () => {
       <p className="text-[10px] text-slate-400 mt-4">
         Health and CU are composed per Organisation under exact Organisation-target grants. “Not authorised” appears where the operator does not hold that grant.
         Admission, lifecycle and commercial capacity are separate: zero CU blocks new accepted feedback only — it never suspends, closes or un-admits an Organisation.
-        “Low” is an operator watch flag (≤ 20 CU remaining); no governed low-balance threshold exists. There is no Trial status.
+        No low/medium/high balance judgement exists and no low-balance threshold is governed. There is no Trial status.
       </p>
     </>
   );
@@ -277,7 +275,7 @@ export const OrganisationDetailView: React.FC<{ id: string }> = ({ id }) => {
               {canCommercial ? (
                 <div className="flex gap-1 flex-wrap items-center">
                   <TierChip v={o.commercial.tier} /><CuChip balance={o.commercial.balance} />
-                  {o.commercial.balance <= 0 ? <AcceptanceBlockedChip /> : cuState(o) === 'low' ? <LowCuChip balance={o.commercial.balance} /> : isComplimentaryOnly(o) ? <ComplimentaryChip /> : <PaidPackChip />}
+                  {o.commercial.balance <= 0 ? <AcceptanceBlockedChip /> : isComplimentaryOnly(o) ? <ComplimentaryChip /> : <OperatorGrantedChip />}
                 </div>
               ) : <Chip icon={<Lock className="w-3 h-3" />}>Not authorised</Chip>}</Tile>
             <Tile label="D · Feedback state" sub={(() => { const stopped = f.filter((x) => firstAbsentDirectory(x) !== null).length; return `${f.length} Feedback Points · ${stopped ? `${stopped} need attention` : 'all complete through Evidence'} · ${o.setup.state === 'complete' ? 'setup complete' : 'setup incomplete'}`; })()}>
@@ -418,9 +416,8 @@ export const OrganisationDetailView: React.FC<{ id: string }> = ({ id }) => {
                 <Field label="Granted">{o.commercial.granted} CU</Field><Field label="Consumed">{o.commercial.consumed} CU</Field><Field label="Tier"><TierChip v={o.commercial.tier} /></Field>
               </div>
               <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden" aria-hidden><div className="h-full bg-cyan-600" style={{ width: `${Math.min(100, (o.commercial.consumed / Math.max(1, o.commercial.granted)) * 100)}%` }} /></div>
-              <div className="text-[10px] text-slate-400 mt-1">{o.commercial.consumed} of {o.commercial.granted} CU consumed · {isComplimentaryOnly(o) ? 'initial complimentary allowance only — no paid pack yet' : 'includes operator-granted packs'}</div>
+              <div className="text-[10px] text-slate-400 mt-1">{o.commercial.consumed} of {o.commercial.granted} CU consumed · {isComplimentaryOnly(o) ? 'initial complimentary allowance only — no operator grant yet' : 'includes operator-granted CU'}</div>
               {o.commercial.balance <= 0 && <div className="mt-3"><Notice tone="warn" title="Zero CU is a fact, not a verdict">No low-balance threshold is governed, so Fedoo flags only zero. A rejected acceptance rolls back and leaves no durable record. Zero CU does not suspend, close or un-admit the Organisation.</Notice></div>}
-              {o.commercial.balance > 0 && o.commercial.balance <= 20 && <div className="mt-3"><Notice tone="warn" title={`${o.commercial.balance} CU remaining — operator watch`}>No governed low threshold exists; this flag is prototype guidance only. Next accepted feedback consumes 1 CU.</Notice></div>}
               <div className="mt-4 flex flex-wrap gap-2">
                 <GatedAction held={can('platform.commercial.grant')} permission="platform.commercial.grant"><Btn variant="primary" onClick={cmds.grant}>Grant {pack} CU pack…</Btn></GatedAction>
                 <GatedAction held={can('platform.commercial.tier.change')} permission="platform.commercial.tier.change"><Btn onClick={cmds.tier}>Change tier to {nextTier}…</Btn></GatedAction>

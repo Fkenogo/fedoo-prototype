@@ -70,6 +70,10 @@ check('admission independent from CU (pending holds 100 CU)', pendingOrg.commerc
 check('lifecycle independent from CU (suspended holds CU; zero never suspends)', suspendedOrg.commercial.balance > 0 && commercial.includes('does not suspend'));
 check('tier independent from CU', commercial.includes('Tier and CU are independent') && commercial.includes('never adds CU'));
 const catalogue = rAt('#/console/catalogue?view=readiness', <CatalogueView />);
+check('no low-CU threshold anywhere', !/Low CU|Low ·|≤ 20|1–20|operator watch/i.test(orgs + ' ' + detail + ' ' + commercial + ' ' + catalogue));
+check('no paid inference from grants', !/Paid \/ manual CU|Paid CU|paid pack/i.test(orgs + ' ' + detail + ' ' + commercial));
+check('operator-granted wording used', orgs.includes('Operator-granted CU') && commercial.includes('no operator grant yet'));
+check('operator grant proves no payment', commercial.includes('Confirm commercial approval outside Fedoo') && commercial.includes('are not synonyms') && !/payment received|invoice settled|cash received|payment was successful|payment succeeded|payment complete/i.test(commercial));
 check('catalogue readiness terminology corrected', catalogue.includes('Session-presentable') && catalogue.includes('Instrument incomplete') && catalogue.includes('Conditional') && !catalogue.includes('Not selectable') && !catalogue.includes('Configuration-selectable') && !catalogue.includes('Selectable for configuration'));
 check('catalogue records A/B/C separation', catalogue.includes('Governed question eligibility') && catalogue.includes('Analytical calculation readiness'));
 check('legacy Product Operations isolation/label', text(renderToStaticMarkup(<OperatorView measures={[]} onReturnToApp={() => undefined} />)).includes('Legacy prototype slice — not current Operator Console authority'));

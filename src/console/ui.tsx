@@ -74,11 +74,8 @@ export const CuChip: React.FC<{ balance: number }> = ({ balance }) =>
 export const ComplimentaryChip: React.FC = () => (
   <Chip tone="sky" title="One-time complimentary allowance granted at establishment. Not recurring, not a lifecycle state, not time-limited.">Complimentary</Chip>
 );
-export const PaidPackChip: React.FC = () => (
-  <Chip tone="indigo" title="Balance includes an operator-granted CU pack after commercial approval outside Fedoo.">Paid / manual CU</Chip>
-);
-export const LowCuChip: React.FC<{ balance: number }> = ({ balance }) => (
-  <Chip tone="amber" title={`Balance is ${balance} CU. No governed low-balance threshold exists; this is an operator watch flag only.`}>Low · {balance} CU left</Chip>
+export const OperatorGrantedChip: React.FC = () => (
+  <Chip tone="indigo" title="Balance includes operator-granted CU (operator_grant ledger entries). A grant records operator action only — it never proves payment; commercial approval stays outside Fedoo.">Operator-granted CU</Chip>
 );
 export const AcceptanceBlockedChip: React.FC = () => (
   <Chip tone="rose" title="New accepted feedback is blocked. History and configuration remain preserved.">Acceptance blocked</Chip>
